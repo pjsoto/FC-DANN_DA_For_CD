@@ -56,6 +56,7 @@ parser.add_argument('--reference_t1_name', dest='reference_t1_name', type=str, d
 parser.add_argument('--reference_t2_name', dest='reference_t2_name', type=str, default='REFERENCE_2017_EPSG32620', help='reference 2 name')
 #Dataset Main paths
 parser.add_argument('--dataset_main_path', dest='dataset_main_path', type=str, default='/media/lvc/Dados/PEDROWORK/Trabajo_Domain_Adaptation/Dataset/', help='Dataset main path')
+parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='E:/PEDROWORK/Trabajo_Domain_Adaptation/Code/checkpoints_results/')
 
 args = parser.parse_args()
 
@@ -65,10 +66,6 @@ def Main():
         args.dataset = 'Amazonia_Legal/'
         dataset = AMAZON_RO(args)
 
-    # if args.dataset == 'Amazon_MT':
-    #     args.dataset = 'Amazonia_Legal/'
-    #     dataset = AMAZON_MT(args)
-
     if args.dataset == 'Amazon_PA':
         args.dataset = 'Amazonia_Legal/'
         dataset = AMAZON_PA(args)
@@ -77,15 +74,15 @@ def Main():
         args.dataset = 'Cerrado_Biome/'
         dataset = CERRADO_MA(args)
 
-    if not os.path.exists('./results_avg/'):
-        os.makedirs('./results_avg/')
+    if not os.path.exists( args.checkpoint_results_main_path + 'results_avg/'):
+        os.makedirs(args.checkpoint_results_main_path + 'results_avg/')
 
-    args.average_results_dir = './results_avg/' + args.results_dir + '/'
+    args.average_results_dir = args.checkpoint_results_main_path + 'results_avg/' + args.results_dir + '/'
     if not os.path.exists(args.average_results_dir):
         os.makedirs(args.average_results_dir)
 
-    args.results_dir = './results/' + args.results_dir + '/'
-    args.checkpoint_dir = './checkpoints/' + args.checkpoint_dir + '/'
+    args.results_dir = args.checkpoint_results_main_path + 'results/' + args.results_dir + '/'
+    args.checkpoint_dir = args.checkpoint_results_main_path + 'checkpoints/' + args.checkpoint_dir + '/'
     counter = 0
     files = os.listdir(args.results_dir)
     initial_flag = True

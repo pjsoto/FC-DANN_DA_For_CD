@@ -54,21 +54,15 @@ parser.add_argument('--reference_t1_name', dest='reference_t1_name', type=str, d
 parser.add_argument('--reference_t2_name', dest='reference_t2_name', type=str, default='REFERENCE_2017_EPSG32620', help='reference 2 name')
 #Dataset Main paths
 parser.add_argument('--dataset_main_path', dest='dataset_main_path', type=str, default='/media/lvc/Dados/PEDROWORK/Trabajo_Domain_Adaptation/Dataset/', help='Dataset main path')
-
+parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='E:/PEDROWORK/Trabajo_Domain_Adaptation/Code/checkpoints_results/')
 args = parser.parse_args()
 
 def Main():
-    # histories = Customdash(ModelName = 'SLVC06_Metrics_compute',
-    #                        email = 'pedrosoto423@gmail.com',
-    #                        password = 'Bad87*be@tles63')
+
     Thresholds = np.array([0.5])
     if args.dataset == 'Amazon_RO':
         args.dataset = 'Amazonia_Legal/'
         dataset = AMAZON_RO(args)
-
-    # if args.dataset == 'Amazon_MT':
-    #     args.dataset = 'Amazonia_Legal/'
-    #     dataset = AMAZON_MT(args)
 
     if args.dataset == 'Amazon_PA':
         args.dataset = 'Amazonia_Legal/'
@@ -78,8 +72,8 @@ def Main():
         args.dataset = 'Cerrado_Biome/'
         dataset = CERRADO_MA(args)
 
-    args.results_dir = './results/' + args.results_dir + '/'
-    args.checkpoint_dir = './checkpoints/' + args.checkpoint_dir + '/'
+    args.results_dir = args.checkpoint_results_main_path + 'results/' + args.results_dir + '/'
+    args.checkpoint_dir = args.checkpoint_results_main_path + 'checkpoints/' + args.checkpoint_dir + '/'
     counter = 0
     files = os.listdir(args.results_dir)
     for i in range(0, len(files)):
