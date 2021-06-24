@@ -95,14 +95,10 @@ parser.add_argument('--target_reference_t1_name', dest='target_reference_t1_name
 parser.add_argument('--target_reference_t2_name', dest='target_reference_t2_name', type=str, default='None', help='reference 2 name')
 #Dataset Main paths
 parser.add_argument('--dataset_main_path', dest='dataset_main_path', type=str, default='/code/Datasets/', help='Dataset main path')
-
+parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='D:/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/')
 parser.add_argument('--save_intermediate_model', dest='save_intermediate_model',type=eval, choices=[True, False], default=True, help='Save intermediate models or not')
 
-# #Architecture configuration
-# parser.add_argument('--FE_Architecture', dest='FE_Architecture', type=str, default='', help='Decide the architecture of the Feature Extractor(FE)')
-# parser.add_argument('--CL_Architecture', dest='CL_Architecture', type=str, default='', help='Decide the architecture of the Classifier(Cl)')
-# parser.add_argument('--DR_Architecture', dest='DR_Architecture', type=str, default='', help='Decide the architecture of the Domain Regressor(DR)')
-# parser.add_argument('--FE_flatten', dest='FE_flatten', type=eval, choices=[True, False], default=True, help='Decide wether a flaten is applied at the end of the choosen predefined architecture of FE')
+
 args = parser.parse_args()
 
 
@@ -111,10 +107,10 @@ def main():
     print(args)
     #histories = Customdash(ModelName = 'SLVC06_train_process', email = 'pedrosoto423@gmail.com', password = 'Bad87*be@tles63')
 
-    if not os.path.exists('./checkpoints/'):
-        os.makedirs('./checkpoints/')
+    if not os.path.exists(''):
+        os.makedirs(args.checkpoint_results_main_path + 'checkpoints/')
 
-    args.checkpoint_dir = './checkpoints/' + args.checkpoint_dir
+    args.checkpoint_dir = args.checkpoint_results_main_path + 'checkpoints/' + args.checkpoint_dir
 
     if args.source_dataset == 'Amazon_RO':
         args.dataset = 'Amazonia_Legal/'
