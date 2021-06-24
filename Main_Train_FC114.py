@@ -95,7 +95,7 @@ parser.add_argument('--target_reference_t1_name', dest='target_reference_t1_name
 parser.add_argument('--target_reference_t2_name', dest='target_reference_t2_name', type=str, default='None', help='reference 2 name')
 #Dataset Main paths
 parser.add_argument('--dataset_main_path', dest='dataset_main_path', type=str, default='/code/Datasets/', help='Dataset main path')
-parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='D:/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/')
+parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='E:/PEDROWORK/Trabajo_Domain_Adaptation/Code/checkpoints_results/')
 parser.add_argument('--save_intermediate_model', dest='save_intermediate_model',type=eval, choices=[True, False], default=True, help='Save intermediate models or not')
 
 
