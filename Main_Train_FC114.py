@@ -107,7 +107,7 @@ def main():
     print(args)
     #histories = Customdash(ModelName = 'SLVC06_train_process', email = 'pedrosoto423@gmail.com', password = 'Bad87*be@tles63')
 
-    if not os.path.exists(''):
+    if not os.path.exists(args.checkpoint_results_main_path + 'checkpoints/'):
         os.makedirs(args.checkpoint_results_main_path + 'checkpoints/')
 
     args.checkpoint_dir = args.checkpoint_results_main_path + 'checkpoints/' + args.checkpoint_dir

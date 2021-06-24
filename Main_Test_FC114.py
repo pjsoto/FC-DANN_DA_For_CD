@@ -53,25 +53,19 @@ parser.add_argument('--reference_t1_name', dest='reference_t1_name', type=str, d
 parser.add_argument('--reference_t2_name', dest='reference_t2_name', type=str, default='REFERENCE_2017_EPSG32620', help='reference 2 name')
 #Dataset Main paths
 parser.add_argument('--dataset_main_path', dest='dataset_main_path', type=str, default='/media/lvc/Dados/PEDROWORK/Trabajo_Domain_Adaptation/Dataset/', help='Dataset main path')
-#Architecture configuration
-#parser.add_argument('--FE_Architecture', dest='FE_Architecture', type=str, default='', help='Decide the architecture of the Feature Extractor(FE)')
-#parser.add_argument('--CL_Architecture', dest='CL_Architecture', type=str, default='', help='Decide the architecture of the Classifier(Cl)')
-#parser.add_argument('--DR_Architecture', dest='DR_Architecture', type=str, default='', help='Decide the architecture of the Domain Regressor(DR)')
-#parser.add_argument('--FE_flatten', dest='FE_flatten', type=eval, choices=[True, False], default=True, help='Decide wether a flaten is applied at the end of the choosen predefined architecture of FE')
+parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='D:/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/')
 
 args = parser.parse_args()
 
 def main():
-    # histories = Customdash(ModelName = 'SLVC06_evaluation_process',
-    #                       email = 'pedrosoto423@gmail.com',
-    #                       password = 'Bad87*be@tles63')
+
     if args.phase == 'test':
         print(args)
-        if not os.path.exists('./results/'):
-            os.makedirs('./results/')
+        if not os.path.exists(args.checkpoint_results_main_path + 'results/'):
+            os.makedirs(args.checkpoint_results_main_path + 'results/')
 
-        args.results_dir = './results/' + args.results_dir + '/'
-        args.checkpoint_dir = './checkpoints/' + args.checkpoint_dir + '/'
+        args.results_dir = args.checkpoint_results_main_path + 'results/' + args.results_dir + '/'
+        args.checkpoint_dir = args.checkpoint_results_main_path + 'checkpoints/' + args.checkpoint_dir + '/'
 
         if args.dataset == 'Amazon_RO':
             args.dataset = 'Amazonia_Legal/'
@@ -111,7 +105,6 @@ def main():
             model = Models(args, dataset)
 
             model.Test()
-            #histories.sendLoss(loss = 0.0, epoch = i, total_epochs = len(checkpoint_files))
 
 if __name__=='__main__':
     main()
