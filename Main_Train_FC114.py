@@ -65,6 +65,7 @@ parser.add_argument('--num_classes', dest='num_classes', type=int, default=2, he
 # Phase
 parser.add_argument('--phase', dest='phase', default='train', help='train, test, generate_image, create_dataset')
 parser.add_argument('--training_type', dest='training_type', type=str, default='classification', help='classification|domain_adaptation|domain_adaptation_check')
+parser.add_argument('--da_type', dest='da_type', type=str, default='CL', help='CL|DR|CL_DR')
 
 # TODO LUCAS:Geralmente rodamos 10x
 parser.add_argument('--runs', dest='runs', type=int, default=1, help='number of executions of the algorithm')

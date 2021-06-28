@@ -65,7 +65,7 @@ class Models():
             self.summary(Decoder_Outputs)
         if self.args.classifier_type == 'SegNet':
 
-            self.args.encoder_blocks = 4
+            self.args.encoder_blocks = 5
             self.args.base_number_of_features = 64
 
             self.SegNet = SegNet(self.args)
@@ -82,12 +82,14 @@ class Models():
 
             #self.logits_c , self.prediction_c, self.features_c = self.networks.build_Unet_Arch(self.data, name = "Unet_Encoder_Classifier")
         if self.args.training_type == 'domain_adaptation':
-            flip_feature = flip_gradient(self.features_c, self.L)
-            self.DR = Domain_Regressors(self.args)
-            if self.args.domain_regressor_type == 'FC':
-                self.logits_d, self.prediction_d = self.DR.build_Domain_Classifier_Arch(flip_feature, name = 'Unet_Domain_Classifier')
-            if self.args.domain_regressor_type == 'D4':
-                self.logits_d = self.DR.D_4(flip_feature, reuse = False)
+            if 'DR' in self.args.da_type:
+                flip_feature = flip_gradient(self.features_c, self.L)
+                self.DR = Domain_Regressors(self.args)
+
+                if self.args.domain_regressor_type == 'FC':
+                    self.logits_d, self.prediction_d = self.DR.build_Domain_Classifier_Arch(flip_feature, name = 'Unet_Domain_Classifier')
+                if self.args.domain_regressor_type == 'D4':
+                    self.logits_d = self.DR.D_4(flip_feature, reuse = False)
 
         if self.args.phase == 'train':
             self.dataset_s = self.dataset[0]
@@ -98,29 +100,29 @@ class Models():
             # Essa mask_c deixa de fora os pixels que eu não me importo. A rede vai gerar um resultado, mas eu não nao me importo com essas saidas
             self.classifier_loss =  tf.reduce_sum(self.mask_c * temp_loss) / tf.reduce_sum(self.mask_c)
             # Perguntar essa frase de baixo pro Pedro
-            # Here I need to thing a way to avoid the patches from the target domain using the same weights mask
             if self.args.training_type == 'classification':
                 self.total_loss = self.classifier_loss
             else:
-                #Verifying the feature dimension and output of domain classifier
-                print('Input shape of D')
-                print(np.shape(self.features_c))
-                self.D_out_shape = self.logits_d.get_shape().as_list()[1:]
-                print('Output shape of D')
-                print(self.D_out_shape)
+                if 'DR' in self.args.da_type:
 
-                self.domainregressor_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = self.logits_d, labels = self.label_d))
-                self.total_loss = self.classifier_loss + self.domainregressor_loss
+                    print('Input shape of D')
+                    print(np.shape(self.features_c))
+                    self.D_out_shape = self.logits_d.get_shape().as_list()[1:]
+                    print('Output shape of D')
+                    print(self.D_out_shape)
+
+                    self.domainregressor_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = self.logits_d, labels = self.label_d))
+                    self.total_loss = self.classifier_loss + self.domainregressor_loss
+                else:
+                    self.total_loss = self.classifier_loss
 
             # Defining the Optimizers
-            # TODO LUCAS: Testar o melhor otimizador e se vai precisar de learning_rate_decay ou não.
             #self.training_optimizer = tf.train.MomentumOptimizer(self.learning_rate, self.args.beta1).minimize(self.total_loss)
             #self.training_optimizer = tf.train.AdamOptimizer(self.args.lr, self.args.beta1).minimize(self.total_loss) #sem o learning rate decay
             self.training_optimizer = tf.train.AdamOptimizer(self.learning_rate, self.args.beta1).minimize(self.total_loss) #com learning rate decay
             self.saver = tf.train.Saver(max_to_keep=5)
             self.sess=tf.Session()
             self.sess.run(tf.initialize_all_variables())
-
 
         elif self.args.phase == 'test':
             self.dataset = dataset
@@ -159,6 +161,7 @@ class Models():
         best_mod_dr = 0
         #best_f1score = 0
         pat = 0
+
         #TODO Lucas: Perguntar ao Pedro se esse class_weights está correto
         class_weights = []
         class_weights.append(0.4)
@@ -168,6 +171,7 @@ class Models():
         reference_t2_s = np.zeros((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
         reference_t1_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
         reference_t2_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
+
         if self.args.balanced_tr:
             class_weights = self.dataset_s.class_weights
 
@@ -184,6 +188,15 @@ class Models():
         if self.args.training_type == 'domain_adaptation':
             corners_coordinates_tr_t = self.dataset_t.corners_coordinates_tr.copy()
             corners_coordinates_vl_t = self.dataset_t.corners_coordinates_vl.copy()
+
+            if 'CL' in self.args.da_type:
+                reference_t1_ = self.dataset_t.references_[0].copy()
+                reference_t1_[self.dataset_t.references_[0] == 0] = 1
+                reference_t1_[self.dataset_t.references_[0] == 1] = 0
+
+                reference_t1_t[:,:,0] = reference_t1_.copy()
+                reference_t2_t[:,:,0] = self.dataset_t.references_[1].copy()
+
 
         print('Sets dimensions before data augmentation')
         print('Source dimensions: ')
@@ -247,6 +260,7 @@ class Models():
             print('Source dimensions: ')
             print(np.shape(corners_coordinates_tr_s))
             print(np.shape(corners_coordinates_vl_s))
+
         if self.args.training_type == 'domain_adaptation':
             print('Target dimension: ')
             print(np.shape(corners_coordinates_tr_t))
@@ -256,8 +270,8 @@ class Models():
         print(np.shape(reference_t2_s))
 
         data = []
-        x_train = np.concatenate((self.dataset_s.images_norm_[0], self.dataset_s.images_norm_[1], reference_t1_s, reference_t2_s), axis = 2)
-        data.append(x_train)
+        x_train_s = np.concatenate((self.dataset_s.images_norm_[0], self.dataset_s.images_norm_[1], reference_t1_s, reference_t2_s), axis = 2)
+        data.append(x_train_s)
         if self.args.training_type == 'domain_adaptation':
             x_train_t = np.concatenate((self.dataset_t.images_norm_[0], self.dataset_t.images_norm_[1], reference_t1_t, reference_t2_t), axis = 2)
             data.append(x_train_t)
@@ -284,26 +298,27 @@ class Models():
             domain_indexs_tr = np.concatenate((domain_indexs_tr_s, domain_indexs_tr_t), axis = 0)
             domain_indexs_vl = np.concatenate((domain_indexs_vl_s, domain_indexs_vl_t), axis = 0)
 
-            # Domain labels configuration
-            if len(self.D_out_shape) > 2:
-                source_labels_tr = np.ones((corners_coordinates_tr_s.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
-                target_labels_tr = np.zeros((corners_coordinates_tr_t.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
-                source_labels_vl = np.ones((corners_coordinates_vl_s.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
-                target_labels_vl = np.zeros((corners_coordinates_vl_t.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
+            if 'DR' in self.args.da_type:
+                # Domain labels configuration
+                if len(self.D_out_shape) > 2:
+                    source_labels_tr = np.ones((corners_coordinates_tr_s.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
+                    target_labels_tr = np.zeros((corners_coordinates_tr_t.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
+                    source_labels_vl = np.ones((corners_coordinates_vl_s.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
+                    target_labels_vl = np.zeros((corners_coordinates_vl_t.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
 
-            else:
-                source_labels_tr = np.ones((corners_coordinates_tr_s.shape[0], 1))
-                target_labels_tr = np.zeros((corners_coordinates_tr_t.shape[0], 1))
+                else:
+                    source_labels_tr = np.ones((corners_coordinates_tr_s.shape[0], 1))
+                    target_labels_tr = np.zeros((corners_coordinates_tr_t.shape[0], 1))
 
-                source_labels_vl = np.ones((corners_coordinates_vl_s.shape[0], 1))
-                target_labels_vl = np.zeros((corners_coordinates_vl_t.shape[0], 1))
+                    source_labels_vl = np.ones((corners_coordinates_vl_s.shape[0], 1))
+                    target_labels_vl = np.zeros((corners_coordinates_vl_t.shape[0], 1))
 
-            y_train_d = np.concatenate((source_labels_tr, target_labels_tr), axis = 0)
-            y_valid_d = np.concatenate((source_labels_vl, target_labels_vl), axis = 0)
+                y_train_d = np.concatenate((source_labels_tr, target_labels_tr), axis = 0)
+                y_valid_d = np.concatenate((source_labels_vl, target_labels_vl), axis = 0)
 
-            print("Domain Labels Dimension: ")
-            print(print(np.shape(y_train_d)))
-            print(print(np.shape(y_valid_d)))
+                print("Domain Labels Dimension: ")
+                print(print(np.shape(y_train_d)))
+                print(print(np.shape(y_valid_d)))
 
 
         #Computing the number of batches
@@ -320,7 +335,11 @@ class Models():
             corners_coordinates_tr = corners_coordinates_tr[index, :]
             domain_indexs_tr = domain_indexs_tr[index, :]
             if self.args.training_type == 'domain_adaptation':
-                y_train_d = y_train_d[index, :]
+                if 'DR' in self.args.da_type:
+                    if len(self.D_out_shape) > 2:
+                        y_train_d = y_train_d[index, :, :, :]
+                    else:
+                        y_train_d = y_train_d[index, :]
 
             #Shuffling the data and the labels for validation samples
             num_samples = corners_coordinates_vl.shape[0]
@@ -329,7 +348,11 @@ class Models():
             corners_coordinates_vl = corners_coordinates_vl[index, :]
             domain_indexs_vl = domain_indexs_vl[index, :]
             if self.args.training_type == 'domain_adaptation':
-                y_valid_d = y_valid_d[index, :]
+                if 'DR' in self.args.da_type:
+                    if len(self.D_out_shape) > 2:
+                        y_valid_d = y_valid_d[index, :, :, :]
+                    else:
+                        y_valid_d = y_valid_d[index, :]
 
             # Open a file in order to save the training history
             f = open(self.args.save_checkpoint_path + "Log.txt","a")
@@ -371,14 +394,11 @@ class Models():
                 corners_coordinates_tr_batch = corners_coordinates_tr[b * self.args.batch_size : (b + 1) * self.args.batch_size , :]
                 domain_index_batch = domain_indexs_tr[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
 
-                #print(domain_index_batch)
-
                 if self.args.data_augmentation:
                     transformation_indexs_batch = corners_coordinates_tr[b * self.args.batch_size : (b + 1) * self.args.batch_size , 4]
 
                 #Extracting the data patches from it's coordinates
                 data_batch_ = Patch_Extraction(data, corners_coordinates_tr_batch, domain_index_batch, self.args.patches_dimension)
-                # print(np.shape(data_batch_))
 
                 # Perform data augmentation?
                 if self.args.data_augmentation:
@@ -404,23 +424,25 @@ class Models():
                 if self.args.training_type == 'classification':
                     _, c_batch_loss, batch_probs  = self.sess.run([self.training_optimizer, self.total_loss, self.prediction_c],
                                                                 feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch,
-                                                                           #self.mask_c: classification_mask_batch, self.class_weights: Weights})
                                                                            self.mask_c: classification_mask_batch, self.class_weights: Weights, self.learning_rate: self.lr})
                 if self.args.training_type == 'domain_adaptation':
-                    if len(self.D_out_shape) > 2:
-                        y_train_d_batch = y_train_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :, :,:]
+                    if 'DR' in self.args.da_type:
+                        if len(self.D_out_shape) > 2:
+                            y_train_d_batch = y_train_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :, :,:]
+                        else:
+                            y_train_d_batch = y_train_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
+
+                        y_train_d_hot_batch = tf.keras.utils.to_categorical(y_train_d_batch, 2)
+
+                        _, c_batch_loss, batch_probs, d_batch_loss  = self.sess.run([self.training_optimizer, self.classifier_loss, self.prediction_c, self.domainregressor_loss],
+                                                                      feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch, self.label_d: y_train_d_hot_batch,
+                                                                                 self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: self.l, self.learning_rate: self.lr})
+
+                        loss_dr_tr[0 , 0] += d_batch_loss
                     else:
-                        y_train_d_batch = y_train_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
-
-                    y_train_d_hot_batch = tf.keras.utils.to_categorical(y_train_d_batch, 2)
-                    #print(np.shape(y_train_d_hot_batch))
-                    #_, c_batch_loss, batch_probs, d_batch_loss, new_variable_to_observe = self.sess.run([self.training_optimizer, self.classifier_loss, self.prediction_c, self.domainregressor_loss, new_parameter_to_oberve(ex:self.prediction_d)], -- acrescentar self.prediction_d na construção do domain classifier
-                    _, c_batch_loss, batch_probs, d_batch_loss  = self.sess.run([self.training_optimizer, self.classifier_loss, self.prediction_c, self.domainregressor_loss],
-                                                                  feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch, self.label_d: y_train_d_hot_batch,
-                                                                             #self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: self.l})
-                                                                             self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: self.l, self.learning_rate: self.lr})
-
-                    loss_dr_tr[0 , 0] += d_batch_loss
+                        _, c_batch_loss, batch_probs  = self.sess.run([self.training_optimizer, self.total_loss, self.prediction_c],
+                                                                       feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch,
+                                                                                  self.mask_c: classification_mask_batch, self.class_weights: Weights, self.learning_rate: self.lr})
 
                 loss_cl_tr[0 , 0] += c_batch_loss
                 # print(loss_cl_tr)
@@ -455,9 +477,14 @@ class Models():
             print(batch_counter_cl)
 
             if self.args.training_type == 'domain_adaptation':
-                loss_dr_tr = loss_dr_tr/batch_counter_cl
-                print ("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, Dr loss: %f]" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr, loss_dr_tr[0,0]))
-                f.write("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, Dr loss: %f]\n" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr, loss_dr_tr[0,0]))
+                if 'DR' in self.args.da_type:
+                    loss_dr_tr = loss_dr_tr/batch_counter_cl
+                    print ("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, Dr loss: %f]" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr, loss_dr_tr[0,0]))
+                    f.write("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, Dr loss: %f]\n" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr, loss_dr_tr[0,0]))
+                else:
+                    print ("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr))
+                    f.write("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]\n" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr))
+
             else:
                 print ("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr))
                 f.write("%d [Training loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]\n" % (e, loss_cl_tr[0,0], accuracy_tr, precission_tr, recall_tr, f1_score_tr))
@@ -497,25 +524,28 @@ class Models():
                 Weights[:,:,:,1] = class_weights[1] * Weights[:,:,:,1]
                 if self.args.training_type == 'classification':
                     c_batch_loss, batch_probs = self.sess.run([self.total_loss, self.prediction_c],
-                                                            feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch,
-                                                                    #self.mask_c: classification_mask_batch, self.class_weights: Weights})
-                                                                    self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
+                                                              feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch,
+                                                                         self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
                 if self.args.training_type == 'domain_adaptation':
-                    if len(self.D_out_shape) > 2:
-                        y_valid_d_batch = y_valid_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :, :,:]
+                    if 'DR' in self.args.da_type:
+                        if len(self.D_out_shape) > 2:
+                            y_valid_d_batch = y_valid_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :, :,:]
+                        else:
+                            y_valid_d_batch = y_valid_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
+
+                        #y_valid_d_batch = y_valid_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
+                        y_valid_d_hot_batch = tf.keras.utils.to_categorical(y_valid_d_batch, 2)
+                        c_batch_loss, batch_probs, d_batch_loss = self.sess.run([self.classifier_loss, self.prediction_c, self.domainregressor_loss],
+                                                                                feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch, self.label_d: y_valid_d_hot_batch,
+                                                                                self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: 0, self.learning_rate: self.lr})
+
+                        loss_dr_vl[0 , 0] += d_batch_loss
                     else:
-                        y_valid_d_batch = y_valid_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
-
-                    #y_valid_d_batch = y_valid_d[b * self.args.batch_size : (b + 1) * self.args.batch_size, :]
-                    y_valid_d_hot_batch = tf.keras.utils.to_categorical(y_valid_d_batch, 2)
-                    c_batch_loss, batch_probs, d_batch_loss = self.sess.run([self.classifier_loss, self.prediction_c, self.domainregressor_loss],
-                                                                            feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch, self.label_d: y_valid_d_hot_batch,
-                                                                            self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: 0, self.learning_rate: self.lr})
-
-                    loss_dr_vl[0 , 0] += d_batch_loss
+                        c_batch_loss, batch_probs = self.sess.run([self.total_loss, self.prediction_c],
+                                                                  feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch,
+                                                                             self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
 
                 loss_cl_vl[0 , 0] += c_batch_loss
-
 
                 y_valid_batch = np.argmax(y_valid_c_hot_batch, axis = 3)
                 y_valid_predict_batch = np.argmax(batch_probs, axis = 3)
@@ -539,16 +569,19 @@ class Models():
                 precission_vl += precission
                 batch_counter_cl += 1
 
-
             loss_cl_vl = loss_cl_vl/(batch_counter_cl)
             accuracy_vl = accuracy_vl/(batch_counter_cl)
             f1_score_vl = f1_score_vl/(batch_counter_cl)
             recall_vl = recall_vl/(batch_counter_cl)
             precission_vl = precission_vl/(batch_counter_cl)
             if self.args.training_type == 'domain_adaptation':
-                loss_dr_vl = loss_dr_vl/batch_counter_cl
-                print ("%d [Validation loss: %f, acc.: %.2f%%,  precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, DrV loss: %f]" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl, loss_dr_vl[0 , 0]))
-                f.write("%d [Validation loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, DrV loss: %f]\n" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl, loss_dr_vl[0 , 0]))
+                if 'DR' in self.args.da_type:
+                    loss_dr_vl = loss_dr_vl/batch_counter_cl
+                    print ("%d [Validation loss: %f, acc.: %.2f%%,  precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, DrV loss: %f]" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl, loss_dr_vl[0 , 0]))
+                    f.write("%d [Validation loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%, DrV loss: %f]\n" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl, loss_dr_vl[0 , 0]))
+                else:
+                    print ("%d [Validation loss: %f, acc.: %.2f%%,  precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl))
+                    f.write("%d [Validation loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]\n" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl))
             else:
                 print ("%d [Validation loss: %f, acc.: %.2f%%,  precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl))
                 f.write("%d [Validation loss: %f, acc.: %.2f%%, precission: %.2f%%, recall: %.2f%%, f1: %.2f%%]\n" % (e, loss_cl_vl[0,0], accuracy_vl, precission_vl, recall_vl, f1_score_vl))
@@ -557,58 +590,73 @@ class Models():
 
             if self.args.training_type == 'domain_adaptation':
 
-                if np.isnan(loss_cl_tr[0,0]) or np.isnan(loss_cl_vl[0,0]):
-                    print('Nan value detected!!!!')
-                    print('[*]ReLoading the models weights...')
-                    self.sess.run(tf.initialize_all_variables())
-                    mod = self.load(self.args.save_checkpoint_path)
-                    if mod:
-                        print(" [*] Load with SUCCESS")
-                    else:
-                        print(" [!] Load failed...")
+                if 'DR' in self.args.da_type:
+                    if np.isnan(loss_cl_tr[0,0]) or np.isnan(loss_cl_vl[0,0]):
+                        print('Nan value detected!!!!')
+                        print('[*]ReLoading the models weights...')
                         self.sess.run(tf.initialize_all_variables())
-                        #self.__init__(self.args, self.dataset)
+                        mod = self.load(self.args.save_checkpoint_path)
+                        if mod:
+                            print(" [*] Load with SUCCESS")
+                        else:
+                            print(" [!] Load failed...")
+                            self.sess.run(tf.initialize_all_variables())
+                            #self.__init__(self.args, self.dataset)
 
-                elif self.l != 0:
-                    FLAG = False
-                    if  best_val_dr < loss_dr_vl[0 , 0] and loss_dr_vl[0 , 0] < 1:
-                        if best_val_fs < f1_score_vl:
-                            best_val_dr = loss_dr_vl[0 , 0]
-                            best_val_fs = f1_score_vl
-                            best_mod_fs = f1_score_vl
-                            best_mod_dr = loss_dr_vl[0 , 0]
-                            best_model_epoch = e
-                            print('[!]Saving best ideal model at epoch: ' + str(e))
-                            self.save(self.args.save_checkpoint_path, best_model_epoch)
-                            FLAG = True
-                        elif np.abs(best_val_fs - f1_score_vl) < 3:
-                            best_val_dr = loss_dr_vl[0 , 0]
-                            best_mod_fs = f1_score_vl
-                            best_mod_dr = loss_dr_vl[0 , 0]
-                            best_model_epoch = e
-                            print('[!]Saving best model attending best Dr_loss at epoch: ' + str(e))
-                            self.save(self.args.save_checkpoint_path, best_model_epoch)
-                            FLAG = True
-                    elif best_val_fs < f1_score_vl:
-                        if  np.abs(best_val_dr - loss_dr_vl[0 , 0]) < 0.2:
-                            best_val_fs = f1_score_vl
-                            best_mod_fs = f1_score_vl
-                            best_mod_dr = loss_dr_vl[0 , 0]
-                            best_model_epoch = e
-                            print('[!]Saving best model attending best f1-score at epoch: ' + str(e))
-                            self.save(self.args.save_checkpoint_path, best_model_epoch)
-                            FLAG = True
+                    elif self.l != 0:
+                        FLAG = False
+                        if  best_val_dr < loss_dr_vl[0 , 0] and loss_dr_vl[0 , 0] < 1:
+                            if best_val_fs < f1_score_vl:
+                                best_val_dr = loss_dr_vl[0 , 0]
+                                best_val_fs = f1_score_vl
+                                best_mod_fs = f1_score_vl
+                                best_mod_dr = loss_dr_vl[0 , 0]
+                                best_model_epoch = e
+                                print('[!]Saving best ideal model at epoch: ' + str(e))
+                                self.save(self.args.save_checkpoint_path, best_model_epoch)
+                                FLAG = True
+                            elif np.abs(best_val_fs - f1_score_vl) < 3:
+                                best_val_dr = loss_dr_vl[0 , 0]
+                                best_mod_fs = f1_score_vl
+                                best_mod_dr = loss_dr_vl[0 , 0]
+                                best_model_epoch = e
+                                print('[!]Saving best model attending best Dr_loss at epoch: ' + str(e))
+                                self.save(self.args.save_checkpoint_path, best_model_epoch)
+                                FLAG = True
+                        elif best_val_fs < f1_score_vl:
+                            if  np.abs(best_val_dr - loss_dr_vl[0 , 0]) < 0.2:
+                                best_val_fs = f1_score_vl
+                                best_mod_fs = f1_score_vl
+                                best_mod_dr = loss_dr_vl[0 , 0]
+                                best_model_epoch = e
+                                print('[!]Saving best model attending best f1-score at epoch: ' + str(e))
+                                self.save(self.args.save_checkpoint_path, best_model_epoch)
+                                FLAG = True
 
-                    if FLAG:
-                        pat = 0
-                        print('[!] Best Model with DrV loss: %.3f and F1-Score: %.2f%%'% (best_mod_dr, best_mod_fs))
+                        if FLAG:
+                            pat = 0
+                            print('[!] Best Model with DrV loss: %.3f and F1-Score: %.2f%%'% (best_mod_dr, best_mod_fs))
+                        else:
+                            print('[!] The Model has not been considered as suitable for saving procedure.')
+                            pat += 1
+                            if pat > self.args.patience:
+                                break
                     else:
-                        print('[!] The Model has not been considered as suitable for saving procedure.')
+                        print("Warming up!")
+                else:
+                    if best_val_fs < f1_score_vl:
+                        best_val_fs = f1_score_vl
+                        pat = 0
+                        print('[!] Best Validation F1 score: %.2f%%'%(best_val_fs))
+                        best_model_epoch = e
+                        if self.args.save_intermediate_model:
+                            print('[!]Saving best model at epoch: ' + str(e))
+                            self.save(self.args.save_checkpoint_path, best_model_epoch)
+                    else:
                         pat += 1
                         if pat > self.args.patience:
+                            print("Patience limit reachead. Exiting training...")
                             break
-                else:
-                    print("Warming up!")
 
             else:
                 if best_val_fs < f1_score_vl:
