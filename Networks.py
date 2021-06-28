@@ -93,6 +93,7 @@ class Unet():
             for i in range(self.args.encoder_blocks + 1):
                 if i == 0:
                     Layers.append(X)
+                    Layers.append(tf.layers.dropout(Layers[-1], 0.2, name = name + 'dropout_' + str(i)))
                 else:
                     Layers.append(self.general_deconv2d(Layers[-1], self.args.base_number_of_features * (2**(self.args.encoder_blocks - i)), 3, stride=2,
                                                  padding='SAME', activation_function='relu', do_norm=True, name=name + '_deconv2d_' + str(i)))
