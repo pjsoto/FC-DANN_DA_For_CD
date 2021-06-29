@@ -39,6 +39,7 @@ parser.add_argument('--training_type', dest='training_type', type=str, default='
 #Checkpoint dir
 parser.add_argument('--checkpoint_dir', dest='checkpoint_dir', default='./DA_prove', help='Domain adaptation checkpoints')
 parser.add_argument('--results_dir', dest='results_dir', type=str, default='./results_DA_prove', help='results will be saved here')
+parser.add_argument('--da_type', dest='da_type', type=str, default='CL', help='CL|DR|CL_DR')
 # Images dir and names
 # Images dir and names
 parser.add_argument('--dataset', dest='dataset', type=str, default='Amazonia_Legal/',help='The name of the dataset used')
