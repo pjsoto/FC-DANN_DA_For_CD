@@ -635,7 +635,6 @@ class Models():
                                 f.write("[!]Best model attending best f1-score \n")
                                 self.save(self.args.save_checkpoint_path, best_model_epoch)
                                 FLAG = True
-                f.close()
 
                         if FLAG:
                             pat = 0
@@ -661,6 +660,7 @@ class Models():
                         if pat > self.args.patience:
                             print("Patience limit reachead. Exiting training...")
                             break
+                f.close()
 
             else:
                 if best_val_fs < f1_score_vl:
