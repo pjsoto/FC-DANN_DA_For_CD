@@ -65,7 +65,7 @@ class Models():
             self.summary(Decoder_Outputs)
         if self.args.classifier_type == 'SegNet':
 
-            self.args.encoder_blocks = 5
+            self.args.encoder_blocks = 4
             self.args.base_number_of_features = 64
 
             self.SegNet = SegNet(self.args)
@@ -613,7 +613,7 @@ class Models():
                                 best_mod_dr = loss_dr_vl[0 , 0]
                                 best_model_epoch = e
                                 print('[!]Saving best ideal model at epoch: ' + str(e))
-                                f.write("[!]Saving best ideal model at epoch: " + str(e) + "\n")
+                                f.write("[!]Ideal best ideal model\n")
                                 self.save(self.args.save_checkpoint_path, best_model_epoch)
                                 FLAG = True
                             elif np.abs(best_val_fs - f1_score_vl) < 3:
@@ -622,7 +622,7 @@ class Models():
                                 best_mod_dr = loss_dr_vl[0 , 0]
                                 best_model_epoch = e
                                 print('[!]Saving best model attending best Dr_loss at epoch: ' + str(e))
-                                f.write("[!]Saving best model attending best Dr_loss at epoch: " + str(e) + "\n")
+                                f.write("[!]Best model attending best Dr_loss\n")
                                 self.save(self.args.save_checkpoint_path, best_model_epoch)
                                 FLAG = True
                         elif best_val_fs < f1_score_vl:
@@ -632,7 +632,7 @@ class Models():
                                 best_mod_dr = loss_dr_vl[0 , 0]
                                 best_model_epoch = e
                                 print('[!]Saving best model attending best f1-score at epoch: ' + str(e))
-                                f.write("[!]Saving best model attending best f1-score at epoch: " + str(e) + "\n")
+                                f.write("[!]Best model attending best f1-score \n")
                                 self.save(self.args.save_checkpoint_path, best_model_epoch)
                                 FLAG = True
 
