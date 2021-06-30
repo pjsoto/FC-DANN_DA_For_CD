@@ -589,7 +589,7 @@ class Models():
             f.close()
 
             if self.args.training_type == 'domain_adaptation':
-
+                f = open(self.args.save_checkpoint_path + "Log.txt","a")
                 if 'DR' in self.args.da_type:
                     if np.isnan(loss_cl_tr[0,0]) or np.isnan(loss_cl_vl[0,0]):
                         print('Nan value detected!!!!')
@@ -635,6 +635,7 @@ class Models():
                                 f.write("[!]Best model attending best f1-score \n")
                                 self.save(self.args.save_checkpoint_path, best_model_epoch)
                                 FLAG = True
+                f.close()
 
                         if FLAG:
                             pat = 0
