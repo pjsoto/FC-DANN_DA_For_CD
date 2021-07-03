@@ -464,7 +464,7 @@ class DeepLabV3Plus():
                             image_level_features, inputs_size, name='upsample')
 
                     # net = tf.concat([conv_1x1, conv_3x3_1, conv_3x3_2, conv_3x3_3, image_level_features], axis=3, name='concat')
-                    net = tf.concat([conv_1x1, conv_3x3_1, conv_3x3_2, image_level_features], axis=3, name='concat')
+                    net = tf.concat([conv_1x1, conv_3x3_1, conv_3x3_2, conv_3x3_3, image_level_features], axis=3, name='concat')
                     net = layers_lib.conv2d(
                         net, depth, [1, 1], stride=1, scope='conv_1x1_concat')
 

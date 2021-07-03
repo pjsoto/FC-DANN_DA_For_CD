@@ -269,10 +269,10 @@ class Xception():
                                               padding='SAME', activation_function='relu', do_norm=True, name=name + '_conv2d_9'))
             Layers.append(self.general_conv2d(Layers[-1], 728, 3, stride=1, conv_type = 'dep_conv',
                                               padding='SAME', activation_function='None', do_norm=True, name=name + '_conv2d_10'))
-            Layers.append(tf.layers.max_pooling2d(Layers[-1], 2, 2, name=name + '_maxpooling_2'))
+            #Layers.append(tf.layers.max_pooling2d(Layers[-1], 2, 2, name=name + '_maxpooling_2'))
 
 
-            tensor = self.general_conv2d(tensor, 728, 1, stride=2, conv_type = 'conv',
+            tensor = self.general_conv2d(tensor, 728, 1, stride=1, conv_type = 'conv',
                                                padding='SAME', activation_function='None', do_norm=True, name=name + '_conv2d_11')
             Layers.append(tf.math.add(tensor, Layers[-1], name = 'shorcut_3'))
             Layers.append(tf.nn.relu(Layers[-1], name='relu_3'))
