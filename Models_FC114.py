@@ -61,8 +61,8 @@ class Models():
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
-            self.summary(Encoder_Outputs)
-            self.summary(Decoder_Outputs)
+            self.summary(Encoder_Outputs, "Encoder: ")
+            self.summary(Decoder_Outputs, "Decoder: ")
         if self.args.classifier_type == 'SegNet':
 
             self.args.encoder_blocks = 4
@@ -77,8 +77,31 @@ class Models():
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
-            self.summary(Encoder_Outputs)
-            self.summary(Decoder_Outputs)
+            self.summary(Encoder_Outputs, "Encoder: ")
+            self.summary(Decoder_Outputs, "Decoder: ")
+        if self.args.classifier_type == 'DeepLab':
+
+            self.args.backbone = 'mobile_net'
+            self.args.residual_block_type = 'simple'
+            self.args.filters = (16, 32, 64)
+            self.args.stages = (2, 2, 2)
+            self.args.aspp_rates = (1, 2, 3)
+            self.args.data_format = 'channel_last'
+            self.args.bn_decay = 0.9997
+
+            self.DeepLab = DeepLabV3Plus(self.args)
+
+            #Building the encoder
+            Encoder_Outputs, low_Level_Features = self.DeepLab.build_DeepLab_Encoder(self.data, name = "DeepLab_Encoder")
+            self.summary(Encoder_Outputs, "Encoder: ")
+            #Building Decoder
+            Decoder_Outputs = self.DeepLab.build_DeepLab_Decoder(Encoder_Outputs[-1], low_Level_Features, name = "DeepLab_Decoder")
+            self.summary(Decoder_Outputs, "Decoder: ")
+
+            self.features_c = Encoder_Outputs[-1]
+            self.logits_c = Decoder_Outputs[-2]
+            self.prediction_c = Decoder_Outputs[-1]
+
 
             #self.logits_c , self.prediction_c, self.features_c = self.networks.build_Unet_Arch(self.data, name = "Unet_Encoder_Classifier")
         if self.args.training_type == 'domain_adaptation':
@@ -137,9 +160,15 @@ class Models():
                 print(" [!] Load failed...")
                 sys.exit()
 
-    def summary(self, net):
+    def summary(self, net, name):
+
+        f = open(self.args.save_checkpoint_path + "Architecture.txt","a")
+        f.write(name + "\n")
         for i in range(len(net)):
             print(net[i].get_shape().as_list())
+            f.write(str(net[i].get_shape().as_list()) + "\n")
+            #print(net[i].op.name)
+        f.close()
 
     def weighted_cross_entropy_c(self, label_c, prediction_c, class_weights):
         temp = -label_c * tf.log(prediction_c + 1e-3)
@@ -751,8 +780,8 @@ class Models():
             model_name = "Unet"
         elif self.args.classifier_type == 'SegNet': #if/elif inserido
             model_name = "SegNet"
-        elif self.args.classifier_type == 'Resunet': #if/elif inserido
-            model_name = "Resunet"
+        elif self.args.classifier_type == 'DeepLab': #if/elif inserido
+            model_name = "DeepLab"
         # Not saving because of google colab
         self.saver.save(self.sess,
                         os.path.join(checkpoint_dir, model_name),
