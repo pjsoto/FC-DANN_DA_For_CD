@@ -50,8 +50,8 @@ class Models():
         # TODO LUCAS: É aqui que eu tenho que mexer!!!! DeepLab vai ser outro if e talvez mexer no decoder.
         if self.args.classifier_type == 'Unet':
 
-            self.args.encoder_blocks = 4
-            self.args.base_number_of_features = 64
+            self.args.encoder_blocks = 5
+            self.args.base_number_of_features = 16
             self.Unet = Unet(self.args)
             #Defining the classifiers
 
