@@ -14,9 +14,10 @@ import matplotlib.pyplot as plt
 
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.contrib import layers as layers_lib
 #--------------------
 
-
+from BaseModels import *
 
 class Unet():
     def __init__(self, args):
@@ -109,6 +110,12 @@ class Unet():
             Layers.append(tf.nn.softmax(Layers[-1], name=name + '_softmax'))
 
             return Layers
+
+    def build_DeepLab_Decoder(self, X, name = "DeepLab_Decoder_Arch"):
+        Layers = []
+        with rf.variable_scope(name):
+            Layers.append(X)
+            Layers.append(tf.image.resize_bilinear(Layers[-1], [self.args.patches_dimension, self.args.patches_dimension, 2], name='upsample'))
 
     def general_conv2d(self, input_data, filters=64,  kernel_size=7, stride=1, stddev=0.02, activation_function="relu", padding="VALID", do_norm=True, relu_factor=0, name="conv2d"):
         with tf.variable_scope(name):
@@ -328,3 +335,137 @@ class SegNet():
             Layers.append(tf.layers.conv2d(Layers[-1], self.args.num_classes, 1, 1, 'SAME', activation=None))
             Layers.append(tf.nn.softmax(Layers[-1], name=name + '_softmax'))
             return Layers
+
+class DeepLabV3Plus():
+    def __init__(self, args):
+        super(DeepLabV3Plus, self).__init__()
+        self.args = args
+
+    def build_DeepLab_Encoder(self, X, name = "DeepLab_Encoder_Arch"):
+
+        """
+        Generator for DeepLab v3 plus models.
+
+        Args:
+        num_classes: The number of possible classes for image classification.
+        aspp_rates: The ASPP rates. default value is 6,12,18
+        base_architecture: The architecture of base Resnet building block.
+        pre_trained_model: The path to the directory that contains pre-trained models.
+        batch_norm_decay: The moving average decay when estimating layer activation
+            statistics in batch normalization.
+        data_format: The input format ('channels_last', 'channels_first', or None).
+            If set to None, the format is dependent on whether a GPU is available.
+            Only 'channels_last' is supported currently.
+
+        Returns:
+        The model function that takes in `inputs` and `is_training` and
+        returns the output tensor of the DeepLab v3 model.
+        """
+        print('-------------------------------------')
+        print('Initializing DeepLab V3+ Architecture')
+        print('-------------------------------------')
+        print('Input data shape:',X.shape)
+
+        if self.args.data_format == 'channels_first':
+            # Convert the inputs from channels_last (NHWC) to channels_first (NCHW).
+            # This provides a large performance boost on GPU. See
+            # https://www.tensorflow.org/performance/performance_guide#data_formats
+            X = tf.transpose(X, [0, 3, 1, 2])
+
+        print('Building backbone architecture...')
+
+        if self.args.backbone == 'resnet_v2_18':
+            backbone = ResNetV2_34_18(self.args)
+            Encoder_Layers = backbone.build_Encoder_Layers(X, self.args.stages, self.args.filters, bn_decay = self.args.bn_decay, name = name)
+            low_Level_Features =  tf.layers.conv2d(Encoder_Layers[6], 48, 1, 1, padding = 'SAME', activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            Encoder_Layers.append(self.atrous_Spatial_Pyramid_Pooling(Encoder_Layers[-1], self.args.aspp_rates, self.args.bn_decay, True))
+
+            return Encoder_Layers, low_Level_Features
+
+        elif self.args.backbone == 'mobile_net':
+            backbone = MobileNet(self.args)
+            Encoder_Layers = backbone.build_Encoder_Layers(X, name = name)
+            Encoder_Layers.append(self.atrous_Spatial_Pyramid_Pooling(Encoder_Layers[-1], self.args.aspp_rates, self.args.bn_decay, True))
+            return Encoder_Layers, None
+
+        elif self.args.backbone == 'xception':
+            backbone = Xception(self.args)
+            Encoder_Layers = backbone.build_Encoder_Layers(X, name = name)
+            low_Level_Features =  tf.layers.conv2d(Encoder_Layers[14], 48, 1, 1, padding = 'SAME', activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            Encoder_Layers.append(self.atrous_Spatial_Pyramid_Pooling(Encoder_Layers[-1], self.args.aspp_rates, self.args.bn_decay, True))
+            return Encoder_Layers, low_Level_Features
+
+    def build_DeepLab_Decoder(self, X, low_Level_Features, name = "DeepLab_Decoder_Arch"):
+
+        Layers = []
+        Layers.append(X)
+        with tf.variable_scope(name):
+            if low_Level_Features is not None:
+                with tf.variable_scope("upsampling_logits"):
+                    low_level_features_size = low_Level_Features.get_shape().as_list()[1:3]
+
+                    Layers.append(tf.image.resize_bilinear(Layers[-1], low_level_features_size, name = "upsample_1"))
+
+                    Layers.append(tf.concat([Layers[-1], low_Level_Features],axis = 3, name = "concat_1"))
+
+            Layers.append(layers_lib.conv2d(Layers[-1], 256, [3 , 3], stride = 1, scope = 'convd_3x3_1'))
+            Layers.append(layers_lib.conv2d(Layers[-1], 256, [3 , 3], stride = 1, scope = 'convd_3x3_2'))
+
+            Layers.append(layers_lib.conv2d(Layers[-1], self.args.num_classes, [1 , 1], activation_fn = None, normalizer_fn = None, scope = 'convd_3x3_3'))
+            inputs_size = [self.args.patches_dimension, self.args.patches_dimension]
+            Layers.append(tf.image.resize_bilinear(Layers[-1], inputs_size, name='upsample_2'))
+            Layers.append(tf.nn.softmax(Layers[-1], name = name + '_softmax'))
+
+            return Layers
+
+    def atrous_Spatial_Pyramid_Pooling(self, inputs, aspp_rates, batch_norm_decay, is_training, depth=256):
+        """Atrous Spatial Pyramid Pooling.
+
+        Args:
+        inputs: A tensor of size [batch, height, width, channels].
+        aspp_rates: The ASPP rates for atrous convolution.
+        batch_norm_decay: The moving average decay when estimating layer activation
+            statistics in batch normalization.
+        is_training: A boolean denoting whether the input is for training.
+        depth: The depth of the ResNet unit output.
+
+        Returns:
+        The atrous spatial pyramid pooling output.
+        """
+        with tf.variable_scope("aspp"):
+
+            atrous_rates = aspp_rates or [6, 12, 18]
+
+            with tf.contrib.slim.arg_scope(resnet_v2.resnet_arg_scope(batch_norm_decay=batch_norm_decay)):
+                # with arg_scope([layers.batch_norm], is_training=is_training):
+                    inputs_size = tf.shape(inputs)[1:3]
+                    # (a) one 1x1 convolution and three 3x3 convolutions with rates = (6, 12, 18) when output stride = 16.
+                    # the rates are doubled when output stride = 8.
+                    with tf.variable_scope("atrous_pyramid"):
+                        conv_1x1 = layers_lib.conv2d(inputs, depth, [1, 1], stride=1, scope="conv_1x1")
+                        print(conv_1x1.shape)
+                        conv_3x3_1 = layers_lib.conv2d(inputs, depth, [3, 3], stride=1, rate=atrous_rates[0], scope='conv_3x3_1')
+                        print(conv_3x3_1.shape)
+                        conv_3x3_2 = layers_lib.conv2d(inputs, depth, [3, 3], stride=1, rate=atrous_rates[1], scope='conv_3x3_2')
+                        print(conv_3x3_2.shape)
+                        conv_3x3_3 = layers_lib.conv2d(inputs, depth, [3, 3], stride=1, rate=atrous_rates[2], scope='conv_3x3_3')
+                        print(conv_3x3_3.shape)
+
+                    # (b) the image-level features
+                    with tf.variable_scope("image_level_features"):
+                        # global average pooling
+                        image_level_features = tf.reduce_mean(
+                            inputs, [1, 2], name='global_average_pooling', keepdims=True)
+                        # 1x1 convolution with 256 filters( and batch normalization)
+                        image_level_features = layers_lib.conv2d(image_level_features, depth, [
+                                                                1, 1], stride=1, scope='conv_1x1')
+                        # bilinearly upsample features
+                        image_level_features = tf.image.resize_bilinear(
+                            image_level_features, inputs_size, name='upsample')
+
+                    # net = tf.concat([conv_1x1, conv_3x3_1, conv_3x3_2, conv_3x3_3, image_level_features], axis=3, name='concat')
+                    net = tf.concat([conv_1x1, conv_3x3_1, conv_3x3_2, image_level_features], axis=3, name='concat')
+                    net = layers_lib.conv2d(
+                        net, depth, [1, 1], stride=1, scope='conv_1x1_concat')
+
+                    return net
