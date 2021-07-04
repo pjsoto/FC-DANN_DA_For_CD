@@ -61,8 +61,6 @@ class Models():
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
-            self.summary(Encoder_Outputs, "Encoder: ")
-            self.summary(Decoder_Outputs, "Decoder: ")
         if self.args.classifier_type == 'SegNet':
 
             self.args.encoder_blocks = 4
@@ -77,8 +75,6 @@ class Models():
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
-            self.summary(Encoder_Outputs, "Encoder: ")
-            self.summary(Decoder_Outputs, "Decoder: ")
         if self.args.classifier_type == 'DeepLab':
 
             self.args.backbone = 'xception'
@@ -93,10 +89,10 @@ class Models():
 
             #Building the encoder
             Encoder_Outputs, low_Level_Features = self.DeepLab.build_DeepLab_Encoder(self.data, name = "DeepLab_Encoder")
-            self.summary(Encoder_Outputs, "Encoder: ")
+            #self.summary(Encoder_Outputs, "Encoder: ")
             #Building Decoder
             Decoder_Outputs = self.DeepLab.build_DeepLab_Decoder(Encoder_Outputs[-1], low_Level_Features, name = "DeepLab_Decoder")
-            self.summary(Decoder_Outputs, "Decoder: ")
+            #self.summary(Decoder_Outputs, "Decoder: ")
 
             self.features_c = Encoder_Outputs[-1]
             self.logits_c = Decoder_Outputs[-2]
@@ -117,6 +113,8 @@ class Models():
         if self.args.phase == 'train':
             self.dataset_s = self.dataset[0]
             self.dataset_t = self.dataset[1]
+            self.summary(Encoder_Outputs, "Encoder: ")
+            self.summary(Decoder_Outputs, "Decoder: ")
             #Defining losses
             # Classifier loss, only for the source labeled samples
             temp_loss = self.weighted_cross_entropy_c(self.label_c, self.prediction_c, self.class_weights)
