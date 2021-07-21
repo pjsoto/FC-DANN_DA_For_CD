@@ -156,79 +156,35 @@ class Domain_Regressors():
         self.args = args
     #=============================GABRIEL: DOMAIN_CLASSIFIER=============================
     def build_Domain_Classifier_Arch(self, input_data, name = "Domain_Classifier_Arch"):
+        Layers = []
         with tf.variable_scope(name):
             #Domain Classifier Definition: 2x (Fully_Connected_1024_units + ReLu) + Fully_Connected_1_unit + Logistic
 
-            o_flatten = tf.layers.flatten(input_data)
-
-            o_dense1 = self.general_dense(o_flatten, units=1024, activation_function="relu", name=name + '_dense1')
-            o_dense2 = self.general_dense(o_dense1, units=1024, activation_function="relu", name=name + '_dense2')
-
+            Layers.append(tf.layers.flatten(input_data))
+            Layers.append(self.general_dense(Layers[-1], units=1024, activation_function="relu", name=name + '_dense1'))
+            Layers.append(self.general_dense(Layers[-1], units=1024, activation_function="relu", name=name + '_dense2'))
             #SERÁ AQUI O ERRO??? ACTIVATION NONE NA VERDADE USA UMA ATIVAÇÃO LINEAR
-            logits = tf.layers.dense(o_dense2, units=self.args.num_classes, activation=None)
-
+            Layers.append(tf.layers.dense(Layers[-1], units=self.args.num_classes, activation=None))
             #ALÉM DISSO, AQUI EU USO UMA SOFTMAX, MAS EM MODELS, OUTRA SOFTMAX É USADA EM CIMA DESSE LOGITS (essa saída não é usada em models)
-            prediction = tf.nn.softmax(logits, name=name + '_softmax')
+            Layers.append(tf.nn.softmax(Layers[-1], name=name + '_softmax'))
 
-            return logits, prediction
+            return Layers
 
-    #domain classifier -- Javier
-    def D_4(self, X, reuse):
-        def discrim_conv(name, X, out_channels, filtersize, stride=1, norm='', nonlin=True, init_stddev=-1):
-            with tf.variable_scope(name) as scope:
-                if init_stddev <= 0.0:
-                    init = tf.contrib.layers.variance_scaling_initializer(dtype=tf.float32)
-                else:
-                    init = tf.truncated_normal_initializer(stddev=init_stddev)
-                X = tf.layers.conv2d(X, out_channels, kernel_size=filtersize, strides=(stride, stride), padding="valid",
-                                    kernel_initializer=init)
-                if norm == 'I':
-                    X = tf.contrib.layers.instance_norm(X, scope=scope, reuse=reuse, epsilon=0.001)
-                elif norm == 'B':
-                    X = tf.layers.batch_normalization(X, reuse=reuse, training=True)
-                elif norm == 'G':
-                    X = tf.contrib.layers.group_norm(X, groups=16, scope=scope, reuse=reuse)
-                if nonlin:
-                    X = tf.nn.leaky_relu(X, 0.2)
-                return X
-
-        with tf.variable_scope('discriminator') as scope:
-            if reuse:
-                scope.reuse_variables()
-
-            print('D in:', X.get_shape().as_list())
-
-            X = self.conv_javier('DZ1', X, 512, 1, 1)
-            X = tf.nn.leaky_relu(X, 0.2)
-            X = self.conv_javier('DZ2', X, 512, 1, 1)
-            X = tf.nn.leaky_relu(X, 0.2)
-            X = self.conv_javier('DZ3', X, 512, 1, 1)
-            X = tf.nn.leaky_relu(X, 0.2)
-            X = self.conv_javier('DZ4', X, 512, 1, 1)
-            X = tf.nn.leaky_relu(X, 0.2)
-
-            print('D out before discrim:', X.get_shape().as_list())
-
-            shape = X.get_shape().as_list()[1:3]
-
-            print('D Tensor image shape:', shape)
-
-            X = discrim_conv('d_out', X, 2, shape, norm=False, nonlin=False, init_stddev=0.02)
-
-            print('D out:', X.get_shape().as_list())
-
-
-            return X
 
     def build_Dense_Domain_Classifier(self, input_data, name = "Domain_Classifier_Arch"):
+        Layers = []
+        num_filters = X.get_shape().as_list()[3]
         with tf.variable_scope(name):
+            for i in range(3):
+                if i == 0:
+                    Layer.append(self.general_conv2d(input_data, num_filters/(2**i), 3, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(i)))
+                else:
+                    Layer.append(self.general_conv2d(Layers[-1], num_filters/(2**i), 3, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(i)))
 
-            o_c1 = self.general_conv2d(input_data, 64, 4, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(1))
-            o_c2 = self.general_conv2d(o_c1, 128, 4, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(2))
-            logits = tf.layers.conv2d(o_c2, self.args.num_classes, 1, 1, 'SAME', activation=None)
-            prediction = tf.nn.softmax(logits, name=name + '_softmax')
+            Layers.append(self.general_conv2d(Layers[-1], 2, 1, stride=1, padding='SAME', activation_function='None', do_norm=False, name=name + '_conv2d_' + str(i + 1)))
+            Layers.append(tf.nn.softmax(Layers[-1], name=name + '_softmax'))
 
-            return logits, prediction
+            return Layers
 
     def conv_javier(self, id, input, channels, size=3, stride=1, use_bias=True, padding="SAME", init_stddev=-1.0, dilation=1):
 
