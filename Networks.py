@@ -155,7 +155,7 @@ class Domain_Regressors():
         super(Domain_Regressors, self).__init__()
         self.args = args
     #=============================GABRIEL: DOMAIN_CLASSIFIER=============================
-    def build_Domain_Classifier_Arch(self, input_data, name="Domain_Classifier_Arch"):
+    def build_Domain_Classifier_Arch(self, input_data, name = "Domain_Classifier_Arch"):
         with tf.variable_scope(name):
             #Domain Classifier Definition: 2x (Fully_Connected_1024_units + ReLu) + Fully_Connected_1_unit + Logistic
 
@@ -220,6 +220,16 @@ class Domain_Regressors():
 
             return X
 
+    def build_Dense_Domain_Classifier(self, input_data, name = "Domain_Classifier_Arch"):
+        with tf.variable_scope(name):
+
+            o_c1 = self.general_conv2d(input_data, 64, 4, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(1))
+            o_c2 = self.general_conv2d(o_c1, 128, 4, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(2))
+            logits = tf.layers.conv2d(o_c2, self.args.num_classes, 1, 1, 'SAME', activation=None)
+            prediction = tf.nn.softmax(logits, name=name + '_softmax')
+
+            return logits, prediction
+
     def conv_javier(self, id, input, channels, size=3, stride=1, use_bias=True, padding="SAME", init_stddev=-1.0, dilation=1):
 
         assert padding in ["SAME", "VALID", "REFLECT", "PARTIAL"], 'valid paddings: "SAME", "VALID", "REFLECT", "PARTIAL"'
@@ -281,6 +291,23 @@ class Domain_Regressors():
                 dense = tf.nn.elu(dense, name='elu')
 
             return dense
+
+    def general_conv2d(self, input_data, filters=64,  kernel_size=7, stride=1, stddev=0.02, activation_function="relu", padding="VALID", do_norm=True, relu_factor=0, name="conv2d"):
+        with tf.variable_scope(name):
+            conv = tf.layers.conv2d(
+                input_data, filters, kernel_size, stride, padding, activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
+
+            if do_norm:
+                conv = tf.layers.batch_normalization(conv, momentum=0.9)
+
+            if activation_function == "relu":
+                conv = tf.nn.relu(conv, name='relu')
+            if activation_function == "leakyrelu":
+                conv = tf.nn.leaky_relu(conv, alpha=relu_factor)
+            if activation_function == "elu":
+                conv = tf.nn.elu(conv, name='elu')
+
+            return conv
 
 class SegNet():
     def __init__(self, args):
