@@ -35,7 +35,7 @@ class Models():
         else:
             self.data = tf.placeholder(tf.float32, [None, self.args.patches_dimension, self.args.patches_dimension, 2 * self.args.image_channels], name = "data")
 
-        if self.args.domain_regressor_type == 'D4' or self.args.domain_regressor_type == 'Dense':
+        if self.args.domain_regressor_type == 'Dense':
             self.label_d = tf.placeholder(tf.float32, [None, None, None, self.args.num_classes], name = "label_d")
         if self.args.domain_regressor_type == 'FC':
             self.label_d = tf.placeholder(tf.float32, [None, self.args.num_classes], name = "label_d")
@@ -113,11 +113,11 @@ class Models():
                 self.DR = Domain_Regressors(self.args)
 
                 if self.args.domain_regressor_type == 'FC':
-                    self.logits_d, self.prediction_d = self.DR.build_Domain_Classifier_Arch(flip_feature, name = 'FC_Domain_Classifier')
-                if self.args.domain_regressor_type == 'D4':
-                    self.logits_d = self.DR.D_4(flip_feature, reuse = False)
+                    DR_Ouputs = self.DR.build_Domain_Classifier_Arch(flip_feature, name = 'FC_Domain_Classifier')
                 if self.args.domain_regressor_type == 'Dense':
-                    self.logits_d, self.prediction_d = self.DR.build_Dense_Domain_Classifier(flip_feature, name = 'Dense_Domain_Classifier')
+                    DR_Ouputs = self.DR.build_Dense_Domain_Classifier(flip_feature, name = 'Dense_Domain_Classifier')
+
+                self.logits_d = DR_Ouputs[-2]
 
         if self.args.phase == 'train':
             self.dataset_s = self.dataset[0]
@@ -135,6 +135,8 @@ class Models():
             else:
                 if 'DR' in self.args.da_type:
 
+                    self.summary(DR_Ouputs, "Domain_Regressor: ")
+
                     print('Input shape of D')
                     print(np.shape(self.features_c))
                     self.D_out_shape = self.logits_d.get_shape().as_list()[1:]
@@ -147,8 +149,6 @@ class Models():
                     self.total_loss = self.classifier_loss
 
             # Defining the Optimizers
-            #self.training_optimizer = tf.train.MomentumOptimizer(self.learning_rate, self.args.beta1).minimize(self.total_loss)
-            #self.training_optimizer = tf.train.AdamOptimizer(self.args.lr, self.args.beta1).minimize(self.total_loss) #sem o learning rate decay
             self.training_optimizer = tf.train.AdamOptimizer(self.learning_rate, self.args.beta1).minimize(self.total_loss) #com learning rate decay
             self.saver = tf.train.Saver(max_to_keep=5)
             self.sess=tf.Session()
@@ -188,9 +188,7 @@ class Models():
         return lr
 
     def Train(self):
-        #if self.args.source_dataset == 'Amazon_RO':
-        #    f1score_val_th = 70.0
-
+        
         best_val_fs = 0
         best_val_dr = 0
         best_mod_fs = 0

@@ -186,68 +186,6 @@ class Domain_Regressors():
 
             return Layers
 
-    def conv_javier(self, id, input, channels, size=3, stride=1, use_bias=True, padding="SAME", init_stddev=-1.0, dilation=1):
-
-        assert padding in ["SAME", "VALID", "REFLECT", "PARTIAL"], 'valid paddings: "SAME", "VALID", "REFLECT", "PARTIAL"'
-        if type(size) == int: size = [size, size]
-        if init_stddev <= 0.0:
-            init = tf.contrib.layers.variance_scaling_initializer(dtype=tf.float32)
-        else:
-            init = tf.truncated_normal_initializer(stddev=init_stddev)
-
-        if padding == "PARTIAL":
-            with tf.variable_scope('mask'):
-                _, h, w, _ = input.get_shape().as_list()
-
-                slide_window = size[0] * size[1]
-                mask = tf.ones(shape=[1, h, w, 1])
-                update_mask = tf.layers.conv2d(mask, filters=1, dilation_rate=(dilation, dilation), name='mask' + id,
-                                            kernel_size=size, kernel_initializer=tf.constant_initializer(1.0),
-                                            strides=stride, padding="SAME", use_bias=False, trainable=False)
-                mask_ratio = slide_window / (update_mask + 1e-8)
-                update_mask = tf.clip_by_value(update_mask, 0.0, 1.0)
-                mask_ratio = mask_ratio * update_mask
-
-            with tf.variable_scope('parconv'):
-                x = tf.layers.conv2d(input, filters=channels, name='conv' + id, kernel_size=size, kernel_initializer=init,
-                                    strides=stride, padding="SAME", use_bias=False)
-                x = x * mask_ratio
-                if use_bias:
-                    bias = tf.get_variable("bias" + id, [channels], initializer=tf.constant_initializer(0.0))
-                    x = tf.nn.bias_add(x, bias)
-                return x * update_mask
-
-        if padding == "REFLECT":
-            assert size[0] % 2 == 1 and size[1] % 2 == 1, "REFLECTION PAD ONLY WORKING FOR ODD FILTER SIZE.. " + str(size)
-            pad_x = size[0] // 2
-            pad_y = size[1] // 2
-            input = tf.pad(input, [[0, 0], [pad_x, pad_x], [pad_y, pad_y], [0, 0]], "REFLECT")
-            padding = "VALID"
-
-        return tf.layers.conv2d(input, channels, kernel_size=size, strides=[stride, stride],
-                                padding=padding, kernel_initializer=init, name='conv' + id,
-                                use_bias=use_bias, dilation_rate=(dilation, dilation))
-
-    def general_dense(self, input_data, units=1024, activation_function="relu", use_bias=True, kernel_initializer=None,
-                      bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,bias_regularizer=None, activity_regularizer=None,
-                      kernel_constraint=None, bias_constraint=None, trainable=True, name='dense'):
-
-        with tf.variable_scope(name):
-            dense = tf.layers.dense(input_data, units, activation=None)
-
-#            NÃO SEI SE É NECESSÁRIO COLOCAR O BATCH_NORM
-#            if do_norm:
-#                dense = tf.layers.batch_normalization(dense, momentum=0.9)
-
-            if activation_function == "relu":
-                dense = tf.nn.relu(dense, name='relu')
-            if activation_function == "leakyrelu":
-                dense = tf.nn.leaky_relu(dense, alpha=relu_factor)
-            if activation_function == "elu":
-                dense = tf.nn.elu(dense, name='elu')
-
-            return dense
-
     def general_conv2d(self, input_data, filters=64,  kernel_size=7, stride=1, stddev=0.02, activation_function="relu", padding="VALID", do_norm=True, relu_factor=0, name="conv2d"):
         with tf.variable_scope(name):
             conv = tf.layers.conv2d(
