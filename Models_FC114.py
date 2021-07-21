@@ -35,8 +35,8 @@ class Models():
         else:
             self.data = tf.placeholder(tf.float32, [None, self.args.patches_dimension, self.args.patches_dimension, 2 * self.args.image_channels], name = "data")
 
-        if self.args.domain_regressor_type == 'D4':
-            self.label_d = tf.placeholder(tf.float32, [None, 1, 1, self.args.num_classes], name = "label_d")
+        if self.args.domain_regressor_type == 'D4' or self.args.domain_regressor_type == 'Dense':
+            self.label_d = tf.placeholder(tf.float32, [None, None, None, self.args.num_classes], name = "label_d")
         if self.args.domain_regressor_type == 'FC':
             self.label_d = tf.placeholder(tf.float32, [None, self.args.num_classes], name = "label_d")
 
@@ -57,7 +57,15 @@ class Models():
 
             Encoder_Outputs = self.Unet.build_Unet_Encoder(self.data, name = "Unet_Encoder")
             Decoder_Outputs = self.Unet.build_Unet_Decoder(Encoder_Outputs[-1], Encoder_Outputs, name="Unet_Decoder")
-            self.features_c = Encoder_Outputs[-1]
+
+            if self.args.training_type == 'domain_adaptation':
+                if self.args.DR_Localization > 1 and self.args.DR_Localization <= len(Encoder_Outputs):
+                    self.features_c = Encoder_Outputs[self.args.DR_Localization]
+                elif self.args.DR_Localization < 0 and self.args.DR_Localization >= -len(Decoder_Outputs):
+                    self.features_c = Decoder_Outputs[self.args.DR_Localization]
+                elif self.args.DR_Localization > len(Encoder_Outputs):
+                    self.features_c = Decoder_Outputs[self.args.DR_Localization]
+
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
@@ -78,6 +86,7 @@ class Models():
         if self.args.classifier_type == 'DeepLab':
 
             self.args.backbone = 'xception'
+
             self.args.residual_block_type = 'simple'
             self.args.filters = (16, 32)
             self.args.stages = (2, 3)
@@ -94,7 +103,15 @@ class Models():
             Decoder_Outputs = self.DeepLab.build_DeepLab_Decoder(Encoder_Outputs[-1], low_Level_Features, name = "DeepLab_Decoder")
             #self.summary(Decoder_Outputs, "Decoder: ")
 
-            self.features_c = Encoder_Outputs[-1]
+
+            if self.args.training_type == 'domain_adaptation':
+                if self.args.DR_Localization > 1 and self.args.DR_Localization <= len(Encoder_Outputs):
+                    self.features_c = Encoder_Outputs[self.args.DR_Localization]
+                elif self.args.DR_Localization < 0 and self.args.DR_Localization >= -len(Decoder_Outputs):
+                    self.features_c = Decoder_Outputs[self.args.DR_Localization]
+                elif self.args.DR_Localization > len(Encoder_Outputs):
+                    self.features_c = Decoder_Outputs[self.args.DR_Localization]
+
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
@@ -106,9 +123,11 @@ class Models():
                 self.DR = Domain_Regressors(self.args)
 
                 if self.args.domain_regressor_type == 'FC':
-                    self.logits_d, self.prediction_d = self.DR.build_Domain_Classifier_Arch(flip_feature, name = 'Unet_Domain_Classifier')
+                    self.logits_d, self.prediction_d = self.DR.build_Domain_Classifier_Arch(flip_feature, name = 'FC_Domain_Classifier')
                 if self.args.domain_regressor_type == 'D4':
                     self.logits_d = self.DR.D_4(flip_feature, reuse = False)
+                if self.args.domain_regressor_type == 'Dense':
+                    self.logits_d, self.prediction_d = self.DR.build_Dense_Domain_Classifier(flip_feature, name = 'Dense_Domain_Classifier')
 
         if self.args.phase == 'train':
             self.dataset_s = self.dataset[0]
@@ -332,7 +351,6 @@ class Models():
                     target_labels_tr = np.zeros((corners_coordinates_tr_t.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
                     source_labels_vl = np.ones((corners_coordinates_vl_s.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
                     target_labels_vl = np.zeros((corners_coordinates_vl_t.shape[0], self.D_out_shape[0], self.D_out_shape[1],1))
-
                 else:
                     source_labels_tr = np.ones((corners_coordinates_tr_s.shape[0], 1))
                     target_labels_tr = np.zeros((corners_coordinates_tr_t.shape[0], 1))
