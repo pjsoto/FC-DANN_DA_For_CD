@@ -64,7 +64,7 @@ class Models():
                 elif self.args.DR_Localization < 0 and self.args.DR_Localization >= -len(Decoder_Outputs):
                     self.features_c = Decoder_Outputs[self.args.DR_Localization]
                 elif self.args.DR_Localization > len(Encoder_Outputs):
-                    self.features_c = Decoder_Outputs[self.args.DR_Localization]
+                    self.features_c = Decoder_Outputs[self.args.DR_Localization - (len(Encoder_Outputs) + len(Decoder_Outputs))]
 
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
@@ -110,8 +110,9 @@ class Models():
                 elif self.args.DR_Localization < 0 and self.args.DR_Localization >= -len(Decoder_Outputs):
                     self.features_c = Decoder_Outputs[self.args.DR_Localization]
                 elif self.args.DR_Localization > len(Encoder_Outputs):
-                    self.features_c = Decoder_Outputs[self.args.DR_Localization]
-
+                    self.features_c = Decoder_Outputs[self.args.DR_Localization - (len(Encoder_Outputs) + len(Decoder_Outputs))]
+                    print(self.args.DR_Localization - (len(Encoder_Outputs) + len(Decoder_Outputs)))
+                    sys.exit()
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
