@@ -63,25 +63,14 @@ class Models():
                     self.features_c = Encoder_Outputs[self.args.DR_Localization]
                 elif self.args.DR_Localization < 0 and self.args.DR_Localization >= -len(Decoder_Outputs):
                     self.features_c = Decoder_Outputs[self.args.DR_Localization]
-                elif self.args.DR_Localization > len(Encoder_Outputs):
+                elif self.args.DR_Localization > len(Encoder_Outputs) and self.args.DR_Localization < (len(Encoder_Outputs) + len(Decoder_Outputs)):
                     self.features_c = Decoder_Outputs[self.args.DR_Localization - (len(Encoder_Outputs) + len(Decoder_Outputs))]
+                else:
+                    print("Please select the layer index correctly!")
 
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
-        if self.args.classifier_type == 'SegNet':
-
-            self.args.encoder_blocks = 4
-            self.args.base_number_of_features = 64
-
-            self.SegNet = SegNet(self.args)
-
-            Encoder_Outputs = self.SegNet.Build_SegNet_Encoder(self.data, ns=[2, 2, 2, 2], ks=[64, 128, 256, 256] ,name = "Segnet_Encoder")
-            Decoder_Outputs = self.SegNet.Build_SegNet_Decoder(Encoder_Outputs[-1], ns=[2, 2, 2, 2], ks=[256, 256, 128, 64], name="Segnet_Decoder")
-
-            self.features_c = Encoder_Outputs[-1]
-            self.logits_c = Decoder_Outputs[-2]
-            self.prediction_c = Decoder_Outputs[-1]
 
         if self.args.classifier_type == 'DeepLab':
 
@@ -98,10 +87,9 @@ class Models():
 
             #Building the encoder
             Encoder_Outputs, low_Level_Features = self.DeepLab.build_DeepLab_Encoder(self.data, name = "DeepLab_Encoder")
-            #self.summary(Encoder_Outputs, "Encoder: ")
             #Building Decoder
             Decoder_Outputs = self.DeepLab.build_DeepLab_Decoder(Encoder_Outputs[-1], low_Level_Features, name = "DeepLab_Decoder")
-            #self.summary(Decoder_Outputs, "Decoder: ")
+
 
 
             if self.args.training_type == 'domain_adaptation':
@@ -109,10 +97,11 @@ class Models():
                     self.features_c = Encoder_Outputs[self.args.DR_Localization]
                 elif self.args.DR_Localization < 0 and self.args.DR_Localization >= -len(Decoder_Outputs):
                     self.features_c = Decoder_Outputs[self.args.DR_Localization]
-                elif self.args.DR_Localization > len(Encoder_Outputs):
+                elif self.args.DR_Localization > len(Encoder_Outputs) and self.args.DR_Localization < (len(Encoder_Outputs) + len(Decoder_Outputs)):
                     self.features_c = Decoder_Outputs[self.args.DR_Localization - (len(Encoder_Outputs) + len(Decoder_Outputs))]
-                    print(self.args.DR_Localization - (len(Encoder_Outputs) + len(Decoder_Outputs)))
-                    sys.exit()
+                else:
+                    print("Please select the layer index correctly!")
+
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
