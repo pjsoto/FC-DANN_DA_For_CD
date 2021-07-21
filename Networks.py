@@ -111,12 +111,6 @@ class Unet():
 
             return Layers
 
-    def build_DeepLab_Decoder(self, X, name = "DeepLab_Decoder_Arch"):
-        Layers = []
-        with rf.variable_scope(name):
-            Layers.append(X)
-            Layers.append(tf.image.resize_bilinear(Layers[-1], [self.args.patches_dimension, self.args.patches_dimension, 2], name='upsample'))
-
     def general_conv2d(self, input_data, filters=64,  kernel_size=7, stride=1, stddev=0.02, activation_function="relu", padding="VALID", do_norm=True, relu_factor=0, name="conv2d"):
         with tf.variable_scope(name):
             conv = tf.layers.conv2d(
@@ -173,7 +167,7 @@ class Domain_Regressors():
 
     def build_Dense_Domain_Classifier(self, input_data, name = "Domain_Classifier_Arch"):
         Layers = []
-        num_filters = X.get_shape().as_list()[3]
+        num_filters = input_data.get_shape().as_list()[3]
         with tf.variable_scope(name):
             for i in range(3):
                 if i == 0:
