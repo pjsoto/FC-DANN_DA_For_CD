@@ -171,9 +171,9 @@ class Domain_Regressors():
         with tf.variable_scope(name):
             for i in range(3):
                 if i == 0:
-                    Layer.append(self.general_conv2d(input_data, num_filters/(2**i), 3, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(i)))
+                    Layers.append(self.general_conv2d(input_data, num_filters/(2**i), 3, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(i)))
                 else:
-                    Layer.append(self.general_conv2d(Layers[-1], num_filters/(2**i), 3, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(i)))
+                    Layers.append(self.general_conv2d(Layers[-1], num_filters/(2**i), 3, stride=1, padding='SAME', activation_function='leakyrelu', do_norm=True, name=name + '_conv2d_' + str(i)))
 
             Layers.append(self.general_conv2d(Layers[-1], 2, 1, stride=1, padding='SAME', activation_function='None', do_norm=False, name=name + '_conv2d_' + str(i + 1)))
             Layers.append(tf.nn.softmax(Layers[-1], name=name + '_softmax'))
