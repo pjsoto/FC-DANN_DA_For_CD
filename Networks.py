@@ -197,6 +197,21 @@ class Domain_Regressors():
 
             return conv
 
+    def general_dense(self, input_data, units=1024, activation_function="relu", use_bias=True, kernel_initializer=None,
+                      bias_initializer=tf.zeros_initializer(), kernel_regularizer=None,bias_regularizer=None, activity_regularizer=None,
+                      kernel_constraint=None, bias_constraint=None, trainable=True, name='dense'):
+
+        with tf.variable_scope(name):
+            dense = tf.layers.dense(input_data, units, activation=None)
+
+            if activation_function == "relu":
+                dense = tf.nn.relu(dense, name='relu')
+            if activation_function == "leakyrelu":
+                dense = tf.nn.leaky_relu(dense, alpha=relu_factor)
+            if activation_function == "elu":
+                dense = tf.nn.elu(dense, name='elu')
+
+            return dense
 class SegNet():
     def __init__(self, args):
         super(SegNet, self).__init__()
