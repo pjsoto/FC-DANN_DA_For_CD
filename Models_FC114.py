@@ -178,17 +178,17 @@ class Models():
         f.close()
 
     def weighted_cross_entropy_c(self, label_c, prediction_c, class_weights):
-        temp = -label_c * tf.log(prediction_c + 1e-3)
+        temp = -label_c * tf.log(prediction_c + 1e-3)#[Batch_size, patch_dimension, patc_dimension, 2]
         temp_weighted = class_weights * temp
         loss = tf.reduce_sum(temp_weighted, 3)
-        return loss
+        return loss # [Batch_size, patch_dimension, patc_dimension, 1]
 
     def Learning_rate_decay(self):
         lr = self.args.lr / (1. + 10 * self.p)**0.75 #modificado de **0.75 para **0.95 - maior decaimento
         return lr
 
     def Train(self):
-        
+
         best_val_fs = 0
         best_val_dr = 0
         best_mod_fs = 0
@@ -730,8 +730,6 @@ class Models():
             f.write("[!] Domain Regressor Validation F1-score: %.2f%%: \n" % (best_mod_fs))
             f.write("[!] DrV loss: %.3f: \n" % (best_val_dr))
         f.close()
-
-
 
     def Test(self):
 

@@ -23,6 +23,7 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('--classifier_type', dest='classifier_type', type=str, default='Unet', help='method that will be used, could be used also (siamese_network)')
 parser.add_argument('--skip_connections', dest='skip_connections', type=eval, choices=[True, False], default=False, help='method that will be used, could be used also (siamese_network)')
 parser.add_argument('--domain_regressor_type', dest='domain_regressor_type', type=str, default='FC', help='method that will be used, could be used also (siamese_network)')
+parser.add_argument('--DR_Localization', dest='DR_Localization', type=int, default=-1, help='The layer in whic the Domain regressor will act')
 # Testing parameters
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=4000, help='number images in batch')
 parser.add_argument('--vertical_blocks', dest='vertical_blocks', type=int, default=10, help='number of blocks which will divide the image vertically')
