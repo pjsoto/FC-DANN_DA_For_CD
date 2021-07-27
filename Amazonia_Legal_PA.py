@@ -31,14 +31,15 @@ class AMAZON_PA():
         print(np.shape(image_t1))
         print(np.shape(image_t2))
 
-        reference_t1 = reference_t1[1:1099,:]
+        if reference_t1.shape[0] != image_t1.shape[1] and reference_t1.shape[1] != image_t1.shape[2]:
+            reference_t1 = reference_t1[1:1099,:]
         if os.path.exists(Reference_t2_path):
             reference_t2 = np.load(Reference_t2_path)
             if reference_t2.shape[0] != reference_t1.shape[0]:
                 reference_t2 = reference_t2[1:1099,:]
         elif args.reference_t2_name == 'None':
             reference_t2 = np.ones((1098, 2600))
-        
+
         # Pre-processing references
         if args.buffer:
             print('[*]Computing buffer regions...')
