@@ -28,11 +28,11 @@ class CERRADO_MA():
         reference_t1 = np.load(Reference_t1_path)
         image_t1 = image_t1[:,:1700,:1440]
         image_t2 = image_t2[:,:1700,:1440]
-        if reference_t1.shape[0] != image_t1.shape[1] and reference_t1.shape[1] != image_t1.shape[2]:
+        if reference_t1.shape[0] != image_t1.shape[1] or reference_t1.shape[1] != image_t1.shape[2]:
             reference_t1 = reference_t1[:1700,:1440]
         if os.path.exists(Reference_t2_path):
             reference_t2 = np.load(Reference_t2_path)
-            if reference_t2.shape[0] != reference_t1.shape[0] and reference_t2.shape[1] != reference_t1.shape[1]:
+            if reference_t2.shape[0] != reference_t1.shape[0] or reference_t2.shape[1] != reference_t1.shape[1]:
                 reference_t2 = reference_t2[:1700,:1440]
         elif args.reference_t2_name == 'None':
             reference_t2 = np.ones((1700, 1440))
