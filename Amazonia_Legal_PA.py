@@ -31,7 +31,7 @@ class AMAZON_PA():
         print(np.shape(image_t1))
         print(np.shape(image_t2))
 
-        if reference_t1.shape[0] != image_t1.shape[1]
+        if reference_t1.shape[0] != image_t1.shape[1]:
             reference_t1 = reference_t1[1:1099,:]
         if os.path.exists(Reference_t2_path):
             reference_t2 = np.load(Reference_t2_path)
