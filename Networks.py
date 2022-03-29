@@ -212,6 +212,7 @@ class Domain_Regressors():
                 dense = tf.nn.elu(dense, name='elu')
 
             return dense
+
 class SegNet():
     def __init__(self, args):
         super(SegNet, self).__init__()
@@ -304,9 +305,17 @@ class DeepLabV3Plus():
 
         print('Building backbone architecture...')
 
-        if self.args.backbone == 'resnet_v2_18':
-            backbone = ResNetV2_34_18(self.args)
-            Encoder_Layers = backbone.build_Encoder_Layers(X, self.args.stages, self.args.filters, bn_decay = self.args.bn_decay, name = name)
+        if 'ResNetV1' in self.args.backbone:
+            backbone = ResNetV1(self.args)
+            Encoder_Layers = backbone.build_Encoder_Layers(X, name = name)
+            low_Level_Features =  tf.layers.conv2d(Encoder_Layers[6], 48, 1, 1, padding = 'SAME', activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            Encoder_Layers.append(self.atrous_Spatial_Pyramid_Pooling(Encoder_Layers[-1], self.args.aspp_rates, self.args.bn_decay, True))
+
+            return Encoder_Layers, low_Level_Features
+
+        if 'ResNetV2' in self.args.backbone:
+            backbone = ResNetV2(self.args)
+            Encoder_Layers = backbone.build_Encoder_Layers(X, name = name)
             low_Level_Features =  tf.layers.conv2d(Encoder_Layers[6], 48, 1, 1, padding = 'SAME', activation=None, kernel_initializer=tf.contrib.layers.xavier_initializer())
             Encoder_Layers.append(self.atrous_Spatial_Pyramid_Pooling(Encoder_Layers[-1], self.args.aspp_rates, self.args.bn_decay, True))
 

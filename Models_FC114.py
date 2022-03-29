@@ -71,14 +71,11 @@ class Models():
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
 
-
         if self.args.classifier_type == 'DeepLab':
 
             self.args.backbone = 'xception'
-
-            self.args.residual_block_type = 'simple'
-            self.args.filters = (16, 32)
-            self.args.stages = (2, 3)
+            #self.args.filters = (16, 32)
+            #self.args.stages = (2, 3)
             self.args.aspp_rates = (1, 2, 3)
             self.args.data_format = 'channel_last'
             self.args.bn_decay = 0.9997
@@ -104,9 +101,8 @@ class Models():
 
             self.logits_c = Decoder_Outputs[-2]
             self.prediction_c = Decoder_Outputs[-1]
-
-
             #self.logits_c , self.prediction_c, self.features_c = self.networks.build_Unet_Arch(self.data, name = "Unet_Encoder_Classifier")
+
         if self.args.training_type == 'domain_adaptation':
             if 'DR' in self.args.da_type:
                 flip_feature = flip_gradient(self.features_c, self.L)
