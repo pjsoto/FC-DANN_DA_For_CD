@@ -16,10 +16,10 @@ if args.running_in == 'Datarmor_Interactive':
     Metrics_05_MAIN_COMMAND = "Main_Compute_Metrics_05.py"
     Metrics_th_MAIN_COMMAND = "Main_Compute_Average_Metrics_MT.py"
 if args.running_in == 'Datarmor_PBS':
-    Train_MAIN_COMMAND = "$HOME/CODE/IFREMER-ABYSSES/Transfer_Learning/TF115/Main_Train_FC114.py"
-    Test_MAIN_COMMAND = "$HOME/CODE/IFREMER-ABYSSES/Transfer_Learning/TF115/Main_Test_FC114.py"
-    Metrics_05_MAIN_COMMAND = "$HOME/CODE/IFREMER-ABYSSES/Transfer_Learning/TF115/Main_Compute_Metrics_05.py"
-    Metrics_th_MAIN_COMMAND = "$HOME/CODE/IFREMER-ABYSSES/Transfer_Learning/TF115/Main_Compute_Average_Metrics_MT.py"
+    Train_MAIN_COMMAND = "$HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Train_FC114.py"
+    Test_MAIN_COMMAND = "$HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Test_FC114.py"
+    Metrics_05_MAIN_COMMAND = "$HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Compute_Metrics_05.py"
+    Metrics_th_MAIN_COMMAND = "$HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Compute_Average_Metrics_MT.py"
 
 warnings.filterwarnings("ignore")
 Schedule = []
