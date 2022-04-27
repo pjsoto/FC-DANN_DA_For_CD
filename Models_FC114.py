@@ -74,8 +74,6 @@ class Models():
         if self.args.classifier_type == 'DeepLab':
 
             self.args.backbone = 'xception'
-            #self.args.filters = (16, 32)
-            #self.args.stages = (2, 3)
             self.args.aspp_rates = (1, 2, 3)
             self.args.data_format = 'channel_last'
             self.args.bn_decay = 0.9997
