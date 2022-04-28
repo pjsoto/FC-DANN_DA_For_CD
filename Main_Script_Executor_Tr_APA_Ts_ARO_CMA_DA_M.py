@@ -61,17 +61,17 @@ for dr_localization in DR_LOCALIZATION:
                 #                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                 #                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
-                Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 10 "
-                                "--horizontal_blocks 10 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
-                                "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 "
-                                "--compute_ndvi False --phase compute_metrics --training_type classification "
-                                "--save_result_text True --checkpoint_dir checkpoint_tr_AMAZON_PA_to_AMAZON_RO_" + method + "_" + da + "_" + reference + " --results_dir results_tr_AMAZON_PA_to_AMAZON_RO_ts_AMAZON_RO_" + method + "_" + da + "_" + reference + " "
-                                "--dataset Amazon_RO --images_section Organized/Images/ --reference_section Organized/References/ "
-                                "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
-                                "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
-                                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
-                                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
+                #Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 10 "
+                #                "--horizontal_blocks 10 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
+                #                "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 "
+                #                "--compute_ndvi False --phase compute_metrics --training_type classification "
+                #                "--save_result_text True --checkpoint_dir checkpoint_tr_AMAZON_PA_to_AMAZON_RO_" + method + "_" + da + "_" + reference + " --results_dir results_tr_AMAZON_PA_to_AMAZON_RO_ts_AMAZON_RO_" + method + "_" + da + "_" + reference + " "
+                #                "--dataset Amazon_RO --images_section Organized/Images/ --reference_section Organized/References/ "
+                #                "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
+                #                "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
+                #                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
+                #                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
+                #                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
                 #Schedule.append("python " + Metrics_th_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 10 "
                 #                "--horizontal_blocks 10 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
