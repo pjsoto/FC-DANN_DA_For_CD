@@ -86,11 +86,7 @@ Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
                 #                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 
-REFERENCES = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_PRIOR_20_COS_SIM_Mrg_1_Nsy_0_PRef_0_Met_P-86R-38F1-53']
-#REFERENCES = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-83R-65F1-73',
-#              'REFERENCE_2018_EPSG4674_R220_63_CVA_PRIOR_20_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-53R-88F1-66',
-#              'REFERENCE_2018_EPSG4674_R220_63_CVA_PRIOR_3_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-90R-38F1-54']
-
+REFERENCES = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-83R-65F1-73']
 for dr_localization in DR_LOCALIZATION:
     for method in METHODS:
         for da in DA_TYPES:
