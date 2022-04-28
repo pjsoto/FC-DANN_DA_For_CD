@@ -30,10 +30,10 @@ DA_TYPES = ['DR', 'CL_DR']
 REFERENCES = ['REFERENCE_2017_EPSG32620_R232_67_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-47R-37F1-42']
 Dataset_MAIN_PATH = '/datawork/DATA/CHANGE_DETECTION/'
 Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
-for dr_localization in DR_LOCALIZATION:
-    for method in METHODS:
-        for da in DA_TYPES:
-            for reference in REFERENCES:
+#for dr_localization in DR_LOCALIZATION:
+#    for method in METHODS:
+#        for da in DA_TYPES:
+#            for reference in REFERENCES:
                 #Tr: RO->PA
                 #Schedule.append("python " + Train_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --DR_Localization " + dr_localization + " --skip_connections False --epochs 100 --batch_size 32 --lr 0.0001 "
                 #                "--beta1 0.9 --data_augmentation True --source_vertical_blocks 5 --source_horizontal_blocks 3 --target_vertical_blocks 10 --target_horizontal_blocks 10 "
