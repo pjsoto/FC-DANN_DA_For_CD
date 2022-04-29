@@ -108,7 +108,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--source_dataset Amazon_RO --target_dataset Cerrado_MA --images_section Organized/Images/ --reference_section Organized/References/ "
                                 "--data_type .npy --source_data_t1_year 2016 --source_data_t2_year 2017 --target_data_t1_year 2017 --target_data_t2_year 2018 "
                                 "--source_data_t1_name 18_07_2016_image_R232_67 --source_data_t2_name 21_07_2017_image_R232_67 --target_data_t1_name 18_08_2017_image_R220_63 --target_data_t2_name 21_08_2018_image_R220_63 "
-                                "--source_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --source_reference_t2_name REFERENCE_2017_EPSG32620 --target_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --target_reference_t2_name " + reference  + " "
+                                "--source_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --source_reference_t2_name REFERENCE_2017_EPSG32620_R232_67 --target_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --target_reference_t2_name " + reference  + " "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                                 "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
                 #Tr: RO, Ts: MA-RO
