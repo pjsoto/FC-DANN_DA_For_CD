@@ -49,7 +49,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--source_data_t1_name 18_08_2017_image_R220_63 --source_data_t2_name 21_08_2018_image_R220_63 --target_data_t1_name 18_07_2016_image_R232_67 --target_data_t2_name 21_07_2017_image_R232_67 "
                                 "--source_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --source_reference_t2_name REFERENCE_2018_EPSG4674_R220_63 --target_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --target_reference_t2_name " + reference  + " "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
                 #No-Adaptation
                 #Tr: MA, Ts: RO->MA
                 Schedule.append("python " + Test_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --DR_Localization " + dr_localization + " --skip_connections False --batch_size 500 --vertical_blocks 10 "
@@ -59,7 +59,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
                                 "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
                 Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 10 "
                                 "--horizontal_blocks 10 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
@@ -71,7 +71,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
                                 "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
                 Schedule.append("python " + Metrics_th_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 10 "
                                 "--horizontal_blocks 10 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
@@ -83,7 +83,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
                                 "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 
 
@@ -107,7 +107,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--source_data_t1_name 18_08_2017_image_R220_63 --source_data_t2_name 21_08_2018_image_R220_63 --target_data_t1_name 02_08_2016_image_R225_62 --target_data_t2_name 20_07_2017_image_R225_62 "
                                 "--source_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --source_reference_t2_name REFERENCE_2018_EPSG4674_R220_63 --target_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --target_reference_t2_name " + reference  + " "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 
                 #Domain-Adaptation
@@ -120,7 +120,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
                                 "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --reference_t2_name REFERENCE_2017_EPSG4674_R225_62 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
                 Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 5 "
                                 "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
@@ -132,7 +132,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
                                 "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --reference_t2_name REFERENCE_2017_EPSG4674_R225_62 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
                 Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 5 "
                                 "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
@@ -144,7 +144,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
                                 "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --reference_t2_name REFERENCE_2017_EPSG4674_R225_62 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                                "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
+                                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 
 for i in range(len(Schedule)):
