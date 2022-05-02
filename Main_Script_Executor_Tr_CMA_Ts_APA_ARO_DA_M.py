@@ -69,7 +69,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--dataset Amazon_RO --images_section Organized/Images/ --reference_section Organized/References/ "
                                 "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
                                 "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
-                                "--reference_t1_name PAST_REFERENCE_FROM_1988_2007_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
+                                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                                 "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
 
@@ -81,15 +81,13 @@ for dr_localization in DR_LOCALIZATION:
                                 "--dataset Amazon_RO --images_section Organized/Images/ --reference_section Organized/References/ "
                                 "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
                                 "--data_t1_name 18_07_2016_image_R232_67 --data_t2_name 21_07_2017_image_R232_67 "
-                                "--reference_t1_name PAST_REFERENCE_FROM_1988_2007_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620 "
+                                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --reference_t2_name REFERENCE_2017_EPSG32620_R232_67 "
                                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                                 "--checkpoint_results_main_path /mnt/Data/Work/School/Trabajos_para_Tesis/Trabajo_Domain_Adaptation/Code/DA_Models/Latent_Space_Models/My_Code/UDAB/FC_UDAB_GABRIEL/")
 
 
-REFERENCES = ['REFERENCE_2017_EPSG4674_R225_62_CVA_OTSU_PRIOR_20_COS_SIM_Mrg_1_Nsy_0_PRef_0_Met_P-87R-35F1-50']
-#REFERENCES = ['REFERENCE_2017_EPSG4674_R225_62_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-77R-43F1-55',
-#              'REFERENCE_2017_EPSG4674_R225_62_CVA_PRIOR_20_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-67R-64F1-66',
-#              'REFERENCE_2017_EPSG4674_R225_62_CVA_PRIOR_3_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-90R-5F1-10']
+
+REFERENCES = ['REFERENCE_2017_EPSG4674_R225_62_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-77R-43F1-55']
 
 for dr_localization in DR_LOCALIZATION:
     for method in METHODS:
