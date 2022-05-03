@@ -26,8 +26,8 @@ Schedule = []
 
 DR_LOCALIZATION = ['55']
 METHODS  = ['DeepLab']
-DA_TYPES = ['DR', 'CL_DR']
-REFERENCES = ['REFERENCE_2017_EPSG32620_R232_67_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-47R-37F1-42']
+DA_TYPES = ['DR']
+REFERENCES = ['None']#'REFERENCE_2017_EPSG32620_R232_67_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-47R-37F1-42']
 Dataset_MAIN_PATH = '/datawork/DATA/CHANGE_DETECTION/'
 Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
 for dr_localization in DR_LOCALIZATION:
@@ -86,7 +86,7 @@ for dr_localization in DR_LOCALIZATION:
                                 "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 
-REFERENCES = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-83R-65F1-73']
+REFERENCES = ['None']#'REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-83R-65F1-73']
 for dr_localization in DR_LOCALIZATION:
     for method in METHODS:
         for da in DA_TYPES:
