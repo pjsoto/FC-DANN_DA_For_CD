@@ -60,7 +60,7 @@ Schedule.append("python " + Test_MAIN_COMMAND + " --classifier_type " + METHODS[
 
 Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --skip_connections False --vertical_blocks 3 "
                 "--horizontal_blocks 5 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
-                "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 "
+                "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 11 "
                 "--compute_ndvi False --phase compute_metrics --training_type classification "
                 "--save_result_text True --checkpoint_dir checkpoint_tr_CERRADO_MA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " --results_dir results_tr_CERRADO_MA_ts_CERRADO_MA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " "
                 "--dataset Cerrado_MA --images_section Organized/Images/ --reference_section Organized/References/ "
