@@ -27,7 +27,7 @@ if args.running_in == 'Local_docker':
 METHODS  = ['DeepLab']
 DR_LOCALIZATION = ['55']
 DA_TYPES = ['None']
-REFERENCES = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-83R-65F1-73']
+REFERENCE = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-83R-65F1-73']
 Dataset_MAIN_PATH = '/datawork/DATA/CHANGE_DETECTION/'
 Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
 
