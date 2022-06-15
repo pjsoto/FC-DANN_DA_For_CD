@@ -4,7 +4,7 @@ import argparse
 
 warnings.filterwarnings("ignore")
 Schedule = []
-
+parser = argparse.ArgumentParser(description='')
 parser.add_argument('--running_in', dest='running_in', type=str, default='Datarmor_PBS', help='Decide wether the script will be running')
 args = parser.parse_args()
 
