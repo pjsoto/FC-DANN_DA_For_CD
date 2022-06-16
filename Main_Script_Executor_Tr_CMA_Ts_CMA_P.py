@@ -43,7 +43,7 @@ Schedule.append("python " + Train_MAIN_COMMAND + " --classifier_type " + METHODS
                 "--source_dataset Cerrado_MA --target_dataset Cerrado_MA --images_section Organized/Images/ --reference_section Organized/References/ "
                 "--data_type .npy --source_data_t1_year 2017 --source_data_t2_year 2018 --target_data_t1_year 2016 --target_data_t2_year 2017 "
                 "--source_data_t1_name 18_08_2017_image_R220_63 --source_data_t2_name 21_08_2018_image_R220_63 --target_data_t1_name 18_08_2017_image_R220_63 --target_data_t2_name 21_08_2018_image_R220_63 "
-                "--source_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --source_reference_t2_name  " + REFERENCE[0]  + " --target_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67 --target_reference_t2_name " + REFERENCE[0]  + " "
+                "--source_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --source_reference_t2_name  " + REFERENCE[0]  + " --target_reference_t1_name PAST_REFERENCE_FOR_2018_EPSG4674_R220_63 --target_reference_t2_name " + REFERENCE[0]  + " "
                 "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                 "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
