@@ -27,60 +27,64 @@ if args.running_in == 'Local_docker':
 METHODS  = ['DeepLab']
 DR_LOCALIZATION = ['55']
 DA_TYPES = ['None']
-REFERENCE = ['REFERENCE_2017_EPSG4674_R225_62_CVA_OTSU_COS_SIM_Mrg_0_Nsy_0_PRef_0_Met_P-77R-43F1-55']
+PSEUDLABELS_COEFFICIENTS = ['0.10','0.25','0.50','0.75','0.90','1.0']
+REFERENCE = ['REFERENCE_2017_EPSG4674_R225_62_CVA_OTSU_PRIOR_0_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-77R-43F1-55']
+PAST_REFERENCE = ['PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62_PA']
+
 Dataset_MAIN_PATH = '/datawork/DATA/CHANGE_DETECTION/'
 Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
 
-#Tr: PA, Ts: PA Pseudo Labels
-Schedule.append("python " + Train_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --DR_Localization " + DR_LOCALIZATION[0] + " --skip_connections False --epochs 100 --batch_size 32 --lr 0.0001 "
-                "--beta1 0.9 --data_augmentation True --source_vertical_blocks 5 --source_horizontal_blocks 3 --target_vertical_blocks 5 --target_horizontal_blocks 3 "
-                "--fixed_tiles True --defined_before False --image_channels 7 --patches_dimension 64 "
-                "--overlap_s 0.9 --overlap_t 0.9 --compute_ndvi False --balanced_tr True "
-                "--buffer True --source_buffer_dimension_out 2 --source_buffer_dimension_in 0 --target_buffer_dimension_out 2 --target_buffer_dimension_in 0 --porcent_of_last_reference_in_actual_reference 100 "
-                "--porcent_of_positive_pixels_in_actual_reference_s 2 --porcent_of_positive_pixels_in_actual_reference_t 2 "
-                "--num_classes 2 --phase train --training_type classification --da_type " + DA_TYPES[0] + " --runs 5 "
-                "--patience 10 --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " "
-                "--source_dataset Amazon_PA --target_dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
-                "--data_type .npy --source_data_t1_year 2017 --source_data_t2_year 2018 --target_data_t1_year 2016 --target_data_t2_year 2017 "
-                "--source_data_t1_name 02_08_2016_image_R225_62 --source_data_t2_name 20_07_2017_image_R225_62 --target_data_t1_name 02_08_2016_image_R225_62 --target_data_t2_name 20_07_2017_image_R225_62 "
-                "--source_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --source_reference_t2_name " + REFERENCE[0]  + " --target_reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --target_reference_t2_name " + REFERENCE[0]  + " "
-                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
+for pseudo_labels_coefficient in PSEUDLABELS_COEFFICIENTS:
+    #Tr: PA, Ts: PA Pseudo Labels
+    Schedule.append("python " + Train_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --DR_Localization " + DR_LOCALIZATION[0] + " --skip_connections False --epochs 100 --batch_size 32 --lr 0.0001 "
+                    "--beta1 0.9 --data_augmentation True --source_vertical_blocks 5 --source_horizontal_blocks 3 --target_vertical_blocks 5 --target_horizontal_blocks 3 "
+                    "--fixed_tiles True --defined_before False --image_channels 7 --patches_dimension 64 "
+                    "--overlap_s 0.9 --overlap_t 0.9 --compute_ndvi False --balanced_tr True "
+                    "--buffer True --source_buffer_dimension_out 2 --source_buffer_dimension_in 0 --target_buffer_dimension_out 2 --target_buffer_dimension_in 0 --porcent_of_last_reference_in_actual_reference 100 "
+                    "--porcent_of_positive_pixels_in_actual_reference_s 2 --porcent_of_positive_pixels_in_actual_reference_t 2 "
+                    "--num_classes 2 --phase train --training_type classification --da_type " + DA_TYPES[0] + " --runs 5 --pseudo_labels_coefficient " + pseudo_labels_coefficient + " "
+                    "--patience 10 --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " "
+                    "--source_dataset Amazon_PA --target_dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
+                    "--data_type .npy --source_data_t1_year 2017 --source_data_t2_year 2018 --target_data_t1_year 2016 --target_data_t2_year 2017 "
+                    "--source_data_t1_name 02_08_2016_image_R225_62_PA --source_data_t2_name 20_07_2017_image_R225_62_PA --target_data_t1_name 02_08_2016_image_R225_62_PA --target_data_t2_name 20_07_2017_image_R225_62_PA "
+                    "--source_reference_t1_name " + PAST_REFERENCE[0] + " --source_reference_t2_name " + REFERENCE[0]  + " --target_reference_t1_name " + PAST_REFERENCE[0] + " --target_reference_t2_name " + REFERENCE[0]  + " "
+                    "--dataset_main_path "+ Dataset_MAIN_PATH + " "
+                    "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 
-Schedule.append("python " + Test_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --DR_Localization " + DR_LOCALIZATION[0] + " --skip_connections False --batch_size 500 --vertical_blocks 5 "
-                "--horizontal_blocks 3 --overlap 0.75 --image_channels 7 --patches_dimension 64 --compute_ndvi False --num_classes 2 "
-                "--phase test --training_type classification --da_type " + DA_TYPES[0] + " --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " --results_dir results_tr_AMAZON_PA_ts_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " "
-                "--dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
-                "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
-                "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
-                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --reference_t2_name REFERENCE_2017_EPSG4674_R225_62 "
-                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
+    Schedule.append("python " + Test_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --DR_Localization " + DR_LOCALIZATION[0] + " --skip_connections False --batch_size 500 --vertical_blocks 5 "
+                    "--horizontal_blocks 3 --overlap 0.75 --image_channels 7 --patches_dimension 64 --compute_ndvi False --num_classes 2 "
+                    "--phase test --training_type classification --da_type " + DA_TYPES[0] + " --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " --results_dir results_tr_AMAZON_PA_ts_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " "
+                    "--dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
+                    "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
+                    "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
+                    "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62_PA --reference_t2_name REFERENCE_2017_EPSG4674_R225_62_PA "
+                    "--dataset_main_path "+ Dataset_MAIN_PATH + " "
+                    "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
-Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --skip_connections False --vertical_blocks 5 "
-                "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
-                "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 "
-                "--compute_ndvi False --phase compute_metrics --training_type classification "
-                "--save_result_text True --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " --results_dir results_tr_AMAZON_PA_ts_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " "
-                "--dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
-                "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
-                "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
-                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --reference_t2_name REFERENCE_2017_EPSG4674_R225_62 "
-                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
+    Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --skip_connections False --vertical_blocks 5 "
+                    "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
+                    "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 "
+                    "--compute_ndvi False --phase compute_metrics --training_type classification "
+                    "--save_result_text True --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " --results_dir results_tr_AMAZON_PA_ts_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " "
+                    "--dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
+                    "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
+                    "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
+                    "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62_PA --reference_t2_name REFERENCE_2017_EPSG4674_R225_62_PA "
+                    "--dataset_main_path "+ Dataset_MAIN_PATH + " "
+                    "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
-Schedule.append("python " + Metrics_th_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --skip_connections False --vertical_blocks 5 "
-                "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
-                "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 --Npoints 100 "
-                "--compute_ndvi False --phase compute_metrics --training_type classification "
-                "--save_result_text False --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " --results_dir results_tr_AMAZON_PA_ts_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + REFERENCE[0] + " "
-                "--dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
-                "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
-                "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
-                "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62 --reference_t2_name REFERENCE_2017_EPSG4674_R225_62 "
-                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
-                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
+    Schedule.append("python " + Metrics_th_MAIN_COMMAND + " --classifier_type " + METHODS[0] + " --domain_regressor_type None --skip_connections False --vertical_blocks 5 "
+                    "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
+                    "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 --Npoints 100 "
+                    "--compute_ndvi False --phase compute_metrics --training_type classification "
+                    "--save_result_text False --checkpoint_dir checkpoint_tr_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " --results_dir results_tr_AMAZON_PA_ts_AMAZON_PA_" + METHODS[0] + "_" + DA_TYPES[0] + "_" + pseudo_labels_coefficient + "_" + REFERENCE[0] + " "
+                    "--dataset Amazon_PA --images_section Organized/Images/ --reference_section Organized/References/ "
+                    "--data_type .npy --data_t1_year 2016 --data_t2_year 2017 "
+                    "--data_t1_name 02_08_2016_image_R225_62 --data_t2_name 20_07_2017_image_R225_62 "
+                    "--reference_t1_name PAST_REFERENCE_FROM_1988_2017_EPSG4674_R225_62_PA --reference_t2_name REFERENCE_2017_EPSG4674_R225_62_PA "
+                    "--dataset_main_path "+ Dataset_MAIN_PATH + " "
+                    "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
 for i in range(len(Schedule)):
     os.system(Schedule[i])
