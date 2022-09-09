@@ -447,7 +447,7 @@ class Models():
                 # Recovering past reference
                 reference_t1_ = data_batch_[:,:,:, 2 * self.args.image_channels]
                 reference_t2_ = data_batch_[:,:,:, 2 * self.args.image_channels + 1]
-                importance_coefficient = data_batch[:,:,:,2 * self.args.image_channels + 2]
+                importance_coefficient = data_batch_[:,:,:,2 * self.args.image_channels + 2]
                 # plt.imshow(reference_t1_[0,:,:])
                 # plt.show()
                 # plt.imshow(reference_t2_[0,:,:])
