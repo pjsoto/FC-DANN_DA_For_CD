@@ -90,17 +90,17 @@ def Main():
         if files[i] == 'Results.txt':
             print('Results file')
         else:
-            Hit_map_path = args.results_dir + files[i] + '/hit_map.npy'
-            if os.path.exists(Hit_map_path):
-                hit_map = np.load(Hit_map_path)
+            Heat_map_path = args.results_dir + files[i] + '/heat_map.npy'
+            if os.path.exists(heat_map_path):
+                heat_map = np.load(Heat_map_path)
                 counter += 1
                 if initial_flag:
-                    HIT_MAP = np.zeros_like(hit_map)
+                    HEAT_MAP = np.zeros_like(heat_map)
                     initial_flag = False
-                HIT_MAP += hit_map
+                HEAT_MAP += heat_map
 
     dataset.Tiles_Configuration(args, 0)
-    Avg_hit_map = HIT_MAP/counter
+    Avg_heat_map = HEAT_MAP/counter
     args.file = 'Avg_Scores'
     args.results_dir = args.average_results_dir
     if not os.path.exists(args.results_dir + args.file + '/'):
@@ -116,7 +116,7 @@ def Main():
         PRECISION_ = []
         ALERT_AREA_ = []
 
-    ACCURACY, FSCORE, RECALL, PRECISION, CONFUSION_MATRIX, ALERT_AREA = Metrics_For_Test_M(Avg_hit_map,
+    ACCURACY, FSCORE, RECALL, PRECISION, CONFUSION_MATRIX, ALERT_AREA = Metrics_For_Test_M(Avg_heat_map,
                                                                                         dataset.references[0], dataset.references[1],
                                                                                         dataset.Train_tiles, dataset.Valid_tiles, dataset.Undesired_tiles,
                                                                                         args)
