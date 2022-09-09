@@ -42,6 +42,7 @@ class Models():
 
         self.label_c = tf.placeholder(tf.float32, [None, self.args.patches_dimension, self.args.patches_dimension, self.args.num_classes], name = "label_c")
         self.mask_c = tf.placeholder(tf.float32, [None, self.args.patches_dimension, self.args.patches_dimension], name="labeled_samples")
+        self.importance_coefficient = tf.placeholder(tf.float32, [None, self.args.patches_dimension, self.args.patches_dimension], name = "cost_functions_components_coefficients")
         self.class_weights = tf.placeholder(tf.float32, [None, self.args.patches_dimension, self.args.patches_dimension, self.args.num_classes], name="class_weights")
         self.L = tf.placeholder(tf.float32, [], name="L" )
         self.phase_train = tf.placeholder(tf.bool, name = "phase_train")
@@ -122,7 +123,7 @@ class Models():
             # Classifier loss, only for the source labeled samples
             temp_loss = self.weighted_cross_entropy_c(self.label_c, self.prediction_c, self.class_weights)
             # Essa mask_c deixa de fora os pixels que eu não me importo. A rede vai gerar um resultado, mas eu não nao me importo com essas saidas
-            self.classifier_loss =  tf.reduce_sum(self.mask_c * temp_loss) / tf.reduce_sum(self.mask_c)
+            self.classifier_loss =  tf.reduce_sum(self.mask_c * (self.importance_coefficient * temp_loss)) / tf.reduce_sum(self.mask_c)
             # Perguntar essa frase de baixo pro Pedro
             if self.args.training_type == 'classification':
                 self.total_loss = self.classifier_loss
@@ -199,6 +200,17 @@ class Models():
         reference_t2_s = np.zeros((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
         reference_t1_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
         reference_t2_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
+
+        #Defining the importance coefficients for the cost function when pseudo-labels are being used in training
+        importance_coefficient_s = self.args.pseudo_labels_coefficient * np.ones((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
+
+        if self.args.training_type == 'domain_adaptation':
+            importance_coefficient_s = np.ones((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
+            importance_coefficient_t = np.ones((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
+            if 'CL' in self.args.da_type:
+                importance_coefficient_t = self.args.pseudo_labels_coefficient * np.ones((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
+
+
 
         if self.args.balanced_tr:
             class_weights = self.dataset_s.class_weights
@@ -298,10 +310,10 @@ class Models():
         print(np.shape(reference_t2_s))
 
         data = []
-        x_train_s = np.concatenate((self.dataset_s.images_norm_[0], self.dataset_s.images_norm_[1], reference_t1_s, reference_t2_s), axis = 2)
+        x_train_s = np.concatenate((self.dataset_s.images_norm_[0], self.dataset_s.images_norm_[1], reference_t1_s, reference_t2_s, importance_coefficient_s), axis = 2)
         data.append(x_train_s)
         if self.args.training_type == 'domain_adaptation':
-            x_train_t = np.concatenate((self.dataset_t.images_norm_[0], self.dataset_t.images_norm_[1], reference_t1_t, reference_t2_t), axis = 2)
+            x_train_t = np.concatenate((self.dataset_t.images_norm_[0], self.dataset_t.images_norm_[1], reference_t1_t, reference_t2_t, importance_coefficient_t), axis = 2)
             data.append(x_train_t)
 
         # Training configuration
@@ -435,6 +447,7 @@ class Models():
                 # Recovering past reference
                 reference_t1_ = data_batch_[:,:,:, 2 * self.args.image_channels]
                 reference_t2_ = data_batch_[:,:,:, 2 * self.args.image_channels + 1]
+                importance_coefficient = data_batch[:,:,:,2 * self.args.image_channels + 2]
                 # plt.imshow(reference_t1_[0,:,:])
                 # plt.show()
                 # plt.imshow(reference_t2_[0,:,:])
@@ -451,7 +464,7 @@ class Models():
                 if self.args.training_type == 'classification':
                     _, c_batch_loss, batch_probs  = self.sess.run([self.training_optimizer, self.total_loss, self.prediction_c],
                                                                 feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch,
-                                                                           self.mask_c: classification_mask_batch, self.class_weights: Weights, self.learning_rate: self.lr})
+                                                                           self.importance_coefficient: importance_coefficient, self.mask_c: classification_mask_batch, self.class_weights: Weights, self.learning_rate: self.lr})
                 if self.args.training_type == 'domain_adaptation':
                     if 'DR' in self.args.da_type:
                         if len(self.D_out_shape) > 2:
@@ -463,13 +476,13 @@ class Models():
 
                         _, c_batch_loss, batch_probs, d_batch_loss  = self.sess.run([self.training_optimizer, self.classifier_loss, self.prediction_c, self.domainregressor_loss],
                                                                       feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch, self.label_d: y_train_d_hot_batch,
-                                                                                 self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: self.l, self.learning_rate: self.lr})
+                                                                                 self.importance_coefficient: importance_coefficient, self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: self.l, self.learning_rate: self.lr})
 
                         loss_dr_tr[0 , 0] += d_batch_loss
                     else:
                         _, c_batch_loss, batch_probs  = self.sess.run([self.training_optimizer, self.total_loss, self.prediction_c],
                                                                        feed_dict={self.data: data_batch, self.label_c: y_train_c_hot_batch,
-                                                                                  self.mask_c: classification_mask_batch, self.class_weights: Weights, self.learning_rate: self.lr})
+                                                                                  self.importance_coefficient: importance_coefficient, self.mask_c: classification_mask_batch, self.class_weights: Weights, self.learning_rate: self.lr})
 
                 loss_cl_tr[0 , 0] += c_batch_loss
                 # print(loss_cl_tr)
@@ -552,7 +565,7 @@ class Models():
                 if self.args.training_type == 'classification':
                     c_batch_loss, batch_probs = self.sess.run([self.total_loss, self.prediction_c],
                                                               feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch,
-                                                                         self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
+                                                                         self.importance_coefficient: importance_coefficient, self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
                 if self.args.training_type == 'domain_adaptation':
                     if 'DR' in self.args.da_type:
                         if len(self.D_out_shape) > 2:
@@ -564,13 +577,13 @@ class Models():
                         y_valid_d_hot_batch = tf.keras.utils.to_categorical(y_valid_d_batch, 2)
                         c_batch_loss, batch_probs, d_batch_loss = self.sess.run([self.classifier_loss, self.prediction_c, self.domainregressor_loss],
                                                                                 feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch, self.label_d: y_valid_d_hot_batch,
-                                                                                self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: 0, self.learning_rate: self.lr})
+                                                                                self.importance_coefficient: importance_coefficient, self.mask_c: classification_mask_batch, self.class_weights: Weights, self.L: 0, self.learning_rate: self.lr})
 
                         loss_dr_vl[0 , 0] += d_batch_loss
                     else:
                         c_batch_loss, batch_probs = self.sess.run([self.total_loss, self.prediction_c],
                                                                   feed_dict={self.data: data_batch, self.label_c: y_valid_c_hot_batch,
-                                                                             self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
+                                                                             self.importance_coefficient: importance_coefficient, self.mask_c: classification_mask_batch, self.class_weights: Weights,  self.learning_rate: self.lr})
 
                 loss_cl_vl[0 , 0] += c_batch_loss
 
@@ -727,7 +740,7 @@ class Models():
 
     def Test(self):
 
-        hit_map_ = np.zeros((self.dataset.k1 * self.dataset.stride, self.dataset.k2 * self.dataset.stride))
+        heat_map_ = np.zeros((self.dataset.k1 * self.dataset.stride, self.dataset.k2 * self.dataset.stride))
 
         x_test = []
         data = np.concatenate((self.dataset.images_norm_[0], self.dataset.images_norm_[1]), axis = 2)
@@ -746,7 +759,7 @@ class Models():
                                          feed_dict={self.data: self.x_test_batch})
 
             for i in range(self.args.batch_size):
-                hit_map_[int(self.corners_coordinates_ts_batch[i, 0]) : int(self.corners_coordinates_ts_batch[i, 0]) + int(self.dataset.stride),
+                heat_map_[int(self.corners_coordinates_ts_batch[i, 0]) : int(self.corners_coordinates_ts_batch[i, 0]) + int(self.dataset.stride),
                         int(self.corners_coordinates_ts_batch[i, 1]) : int(self.corners_coordinates_ts_batch[i, 1]) + int(self.dataset.stride)] = probs[i, int(self.dataset.overlap//2) : int(self.dataset.overlap//2) + int(self.dataset.stride),
                                                                                                                                                            int(self.dataset.overlap//2) : int(self.dataset.overlap//2) + int(self.dataset.stride),1]
 
@@ -758,16 +771,16 @@ class Models():
             probs = self.sess.run(self.prediction_c,
                                          feed_dict={self.data: self.x_test_batch})
             for i in range(self.corners_coordinates_ts_batch.shape[0]):
-                hit_map_[int(self.corners_coordinates_ts_batch[i, 0]) : int(self.corners_coordinates_ts_batch[i, 0]) + int(self.dataset.stride),
+                heat_map_[int(self.corners_coordinates_ts_batch[i, 0]) : int(self.corners_coordinates_ts_batch[i, 0]) + int(self.dataset.stride),
                         int(self.corners_coordinates_ts_batch[i, 1]) : int(self.corners_coordinates_ts_batch[i, 1]) + int(self.dataset.stride)] = probs[i, int(self.dataset.overlap//2) : int(self.dataset.overlap//2) + int(self.dataset.stride),
                                                                                                                                                            int(self.dataset.overlap//2) : int(self.dataset.overlap//2) + int(self.dataset.stride),1]
 
-        hit_map = hit_map_[:self.dataset.k1 * self.dataset.stride - self.dataset.step_row, :self.dataset.k2 * self.dataset.stride - self.dataset.step_col]
-        # plt.imshow(hit_map)
+        heat_map = heat_map_[:self.dataset.k1 * self.dataset.stride - self.dataset.step_row, :self.dataset.k2 * self.dataset.stride - self.dataset.step_col]
+        # plt.imshow(heat_map)
         # plt.show()
         # sys.exit()
-        print(np.shape(hit_map))
-        np.save(self.args.save_results_dir + 'hit_map', hit_map)
+        print(np.shape(heat_map))
+        np.save(self.args.save_results_dir + 'heat_map', heat_map)
 
     def save(self, checkpoint_dir, epoch):
 
@@ -801,11 +814,7 @@ class Models():
         else:
             return ''
 
-def Metrics_For_Test(hit_map,
-                     reference_t1, reference_t2,
-                     Train_tiles, Valid_tiles, Undesired_tiles,
-                     Thresholds,
-                     args):
+def Metrics_For_Test(heat_map, reference_t1, reference_t2, Train_tiles, Valid_tiles, Undesired_tiles, Thresholds, args):
 
     save_path = args.results_dir + args.file + '/'
     print('[*]Defining the initial central patches coordinates...')
@@ -817,7 +826,7 @@ def Metrics_For_Test(hit_map,
     mask_final[mask_final == 3] = 0
     mask_final[mask_final == 2] = 1
 
-    Probs_init = hit_map
+    Probs_init = heat_map
     positive_map_init = np.zeros_like(Probs_init)
 
     # Metrics containers
@@ -826,7 +835,7 @@ def Metrics_For_Test(hit_map,
     RECALL = np.zeros((1, len(Thresholds)))
     PRECISSION = np.zeros((1, len(Thresholds)))
     CONFUSION_MATRIX = np.zeros((2 , 2, len(Thresholds)))
-    CLASSIFICATION_MAPS = np.zeros((len(Thresholds), hit_map.shape[0], hit_map.shape[1], 3))
+    CLASSIFICATION_MAPS = np.zeros((len(Thresholds), heat_map.shape[0], heat_map.shape[1], 3))
     ALERT_AREA = np.zeros((1 , len(Thresholds)))
 
 
@@ -835,7 +844,7 @@ def Metrics_For_Test(hit_map,
     for th in range(len(Thresholds)):
         print(Thresholds[th])
 
-        positive_map_init = np.zeros_like(hit_map)
+        positive_map_init = np.zeros_like(heat_map)
         reference_t1_copy = reference_t1.copy()
 
         threshold = Thresholds[th]
@@ -846,7 +855,7 @@ def Metrics_For_Test(hit_map,
             positive_map_init_ = skimage.morphology.area_opening(positive_map_init.astype('int'),area_threshold = args.area_avoided, connectivity=1)
             eliminated_samples = positive_map_init - positive_map_init_
         else:
-            eliminated_samples = np.zeros_like(hit_map)
+            eliminated_samples = np.zeros_like(heat_map)
 
 
         reference_t1_copy = reference_t1_copy + eliminated_samples
@@ -864,13 +873,13 @@ def Metrics_For_Test(hit_map,
         y_test = reference_t2[central_pixels_coordinates_ts_[:,0].astype('int'), central_pixels_coordinates_ts_[:,1].astype('int')]
 
         #print(np.shape(central_pixels_coordinates_ts))
-        Probs = hit_map[central_pixels_coordinates_ts_[:,0].astype('int'), central_pixels_coordinates_ts_[:,1].astype('int')]
+        Probs = heat_map[central_pixels_coordinates_ts_[:,0].astype('int'), central_pixels_coordinates_ts_[:,1].astype('int')]
         Probs[Probs >= Thresholds[th]] = 1
         Probs[Probs <  Thresholds[th]] = 0
 
         accuracy, f1score, recall, precission, conf_mat = compute_metrics(y_test.astype('int'), Probs.astype('int'))
 
-        Classification_map, _, _ = Classification_Maps(Probs, y_test, central_pixels_coordinates_ts_, hit_map)
+        Classification_map, _, _ = Classification_Maps(Probs, y_test, central_pixels_coordinates_ts_, heat_map)
 
         TP = conf_mat[1 , 1]
         FP = conf_mat[0 , 1]
@@ -917,7 +926,7 @@ def Metrics_For_Test(hit_map,
 
     return ACCURACY, FSCORE, RECALL, PRECISSION, CONFUSION_MATRIX, ALERT_AREA
 
-def Metrics_For_Test_M(hit_map,
+def Metrics_For_Test_M(heat_map,
                      reference_t1, reference_t2,
                      Train_tiles, Valid_tiles, Undesired_tiles,
                      args):
@@ -934,8 +943,8 @@ def Metrics_For_Test_M(hit_map,
     mask_final[mask_final == 3] = 0
     mask_final[mask_final == 2] = 1
 
-    sio.savemat(save_path + 'hit_map.mat' , {'hit_map': hit_map})
-    Probs_init = hit_map
+    sio.savemat(save_path + 'heat_map.mat' , {'heat_map': heat_map})
+    Probs_init = heat_map
     positive_map_init = np.zeros_like(Probs_init)
 
     reference_t1_copy_ = reference_t1.copy()
@@ -961,7 +970,7 @@ def Metrics_For_Test_M(hit_map,
     RECALL = np.zeros((1, len(Thresholds)))
     PRECISSION = np.zeros((1, len(Thresholds)))
     CONFUSION_MATRIX = np.zeros((2 , 2, len(Thresholds)))
-    #CLASSIFICATION_MAPS = np.zeros((len(Thresholds), hit_map.shape[0], hit_map.shape[1], 3))
+    #CLASSIFICATION_MAPS = np.zeros((len(Thresholds), heat_map.shape[0], heat_map.shape[1], 3))
     ALERT_AREA = np.zeros((1 , len(Thresholds)))
 
 
@@ -970,7 +979,7 @@ def Metrics_For_Test_M(hit_map,
     for th in range(len(Thresholds)):
         print(Thresholds[th])
 
-        positive_map_init = np.zeros_like(hit_map)
+        positive_map_init = np.zeros_like(heat_map)
         reference_t1_copy = reference_t1.copy()
 
         threshold = Thresholds[th]
@@ -981,7 +990,7 @@ def Metrics_For_Test_M(hit_map,
             positive_map_init_ = skimage.morphology.area_opening(positive_map_init.astype('int'),area_threshold = args.area_avoided, connectivity=1)
             eliminated_samples = positive_map_init - positive_map_init_
         else:
-            eliminated_samples = np.zeros_like(hit_map)
+            eliminated_samples = np.zeros_like(heat_map)
 
 
         reference_t1_copy = reference_t1_copy + eliminated_samples
@@ -998,13 +1007,13 @@ def Metrics_For_Test_M(hit_map,
         y_test = reference_t2[central_pixels_coordinates_ts_[:,0].astype('int'), central_pixels_coordinates_ts_[:,1].astype('int')]
 
         #print(np.shape(central_pixels_coordinates_ts))
-        Probs = hit_map[central_pixels_coordinates_ts_[:,0].astype('int'), central_pixels_coordinates_ts_[:,1].astype('int')]
+        Probs = heat_map[central_pixels_coordinates_ts_[:,0].astype('int'), central_pixels_coordinates_ts_[:,1].astype('int')]
         Probs[Probs >= Thresholds[th]] = 1
         Probs[Probs <  Thresholds[th]] = 0
 
         accuracy, f1score, recall, precission, conf_mat = compute_metrics(y_test.astype('int'), Probs.astype('int'))
 
-        #Classification_map, _, _ = Classification_Maps(Probs, y_test, central_pixels_coordinates_ts_, hit_map)
+        #Classification_map, _, _ = Classification_Maps(Probs, y_test, central_pixels_coordinates_ts_, heat_map)
 
         TP = conf_mat[1 , 1]
         FP = conf_mat[0 , 1]

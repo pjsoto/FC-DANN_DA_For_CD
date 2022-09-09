@@ -23,7 +23,6 @@ parser.add_argument('--classifier_type', dest='classifier_type', type=str, defau
 parser.add_argument('--skip_connections', dest='skip_connections', type=eval, choices=[True, False], default=False, help='method that will be used, could be used also (siamese_network)')
 parser.add_argument('--domain_regressor_type', dest='domain_regressor_type', type=str, default='FC', help='Architecture of Domain regressor')
 parser.add_argument('--DR_Localization', dest='DR_Localization', type=int, default=-1, help='The layer in whic the Domain regressor will act')
-
 # Training parameters
 parser.add_argument('--epochs', dest='epochs', type=int, default=100, help='number of epochs')
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=32, help='number images in batch')
@@ -32,7 +31,6 @@ parser.add_argument('--lr', dest='lr', type=float, default=0.01, help='initial l
 parser.add_argument('--beta1', dest='beta1', type=float, default=0.9, help='momentum term of adam')
 # Image_processing hyperparameters
 parser.add_argument('--data_augmentation', dest='data_augmentation', type=eval, choices=[True, False], default=True, help='if data argumentation is applied to the data')
-
 # TODO LUCAS:Em quantas colunas ou linhas eu irei dividir minha imagem para gerar os quadradinhos (patches)
 parser.add_argument('--source_vertical_blocks', dest='source_vertical_blocks', type=int, default=10, help='number of blocks which will divide the image vertically')
 parser.add_argument('--source_horizontal_blocks', dest='source_horizontal_blocks', type=int, default=10, help='number of blocks which will divide the image horizontally')
@@ -43,36 +41,30 @@ parser.add_argument('--fixed_tiles', dest='fixed_tiles', type=eval, choices=[Tru
 parser.add_argument('--defined_before', dest='defined_before', type=eval, choices=[True, False], default=False, help='decide if tiles will be choosen randomly or not')
 parser.add_argument('--image_channels', dest='image_channels', type=int, default=7, help='number of image channels')
 parser.add_argument('--patches_dimension', dest='patches_dimension', type=int, default=128, help= 'dimension of the extracted patches')
-
 #
 parser.add_argument('--overlap_s', dest='overlap_s', type=float, default= 0.75, help= 'stride cadence')
 parser.add_argument('--overlap_t', dest='overlap_t', type=float, default= 0.75, help= 'stride cadence')
-
 # compute ndvi refere-se a um indice. Era algum tipo de stack de bandas. compute_ndvi = False. Pode ignorar e manter assim.
 parser.add_argument('--compute_ndvi', dest='compute_ndvi', type=eval, choices=[True, False], default=False, help='Cumpute and stack the ndvi index to the rest of bands')
 parser.add_argument('--balanced_tr', dest='balanced_tr', type=eval, choices=[True, False], default=True, help='Decide wether a balanced training will be performed')
-#parser.add_argument('--balanced_vl', dest='balanced_vl', type=eval, choices=[True, False], default=True, help='Decide wether a balanced training will be performed')
-
-# TODO LUCAS:ParÃƒÂ¢metro buffer para quando for converter de imagem vetorial para pixel
+#
 parser.add_argument('--buffer', dest='buffer', type=eval, choices=[True, False], default=True, help='Decide wether a buffer around deforestated regions will be performed')
 parser.add_argument('--source_buffer_dimension_out', dest='source_buffer_dimension_out', type=int, default=4, help='Dimension of the buffer outside of the area')
 parser.add_argument('--source_buffer_dimension_in', dest='source_buffer_dimension_in', type=int, default=2, help='Dimension of the buffer inside of the area')
 parser.add_argument('--target_buffer_dimension_out', dest='target_buffer_dimension_out', type=int, default=2, help='Dimension of the buffer outside of the area')
 parser.add_argument('--target_buffer_dimension_in', dest='target_buffer_dimension_in', type=int, default=0, help='Dimension of the buffer inside of the area')
-
+#
 parser.add_argument('--porcent_of_last_reference_in_actual_reference', dest='porcent_of_last_reference_in_actual_reference', type=int, default=100, help='Porcent of number of pixels of last reference in the actual reference')
 parser.add_argument('--porcent_of_positive_pixels_in_actual_reference_s', dest='porcent_of_positive_pixels_in_actual_reference_s', type=int, default=2, help='Porcent of number of pixels of last reference in the actual reference in source domain')
 parser.add_argument('--porcent_of_positive_pixels_in_actual_reference_t', dest='porcent_of_positive_pixels_in_actual_reference_t', type=int, default=2, help='Porcent of number of pixels of last reference in the actual reference in target domain')
 parser.add_argument('--num_classes', dest='num_classes', type=int, default=2, help='Number of classes comprised in both domains')
-# Phase
+# Training parameters
 parser.add_argument('--phase', dest='phase', default='train', help='train, test, generate_image, create_dataset')
 parser.add_argument('--training_type', dest='training_type', type=str, default='classification', help='classification|domain_adaptation|domain_adaptation_check')
 parser.add_argument('--da_type', dest='da_type', type=str, default='CL', help='CL|DR|CL_DR')
-
-# TODO LUCAS:Geralmente rodamos 10x
+parser.add_argument('--pseudo_labels_coefficient', dest = 'pseudo_labels_coefficient', type = float, default = 1.0, help = 'Coefficient which represents the importance of pseudo labels in the cost function')
+# Number of times the algorithm will be executed.
 parser.add_argument('--runs', dest='runs', type=int, default=1, help='number of executions of the algorithm')
-#parser.add_argument('--scatter_plot', dest='scatter_plot', type=eval, choices=[True, False], default=True, help='Decide if a scatter plot is done during the training')
-#parser.add_argument('--change_every_epoch', dest='change_every_epoch', type=eval, choices=[True, False], default=False, help='Decide if the target set will be change every epoch in order to balance the training')
 # Early stop parameter
 parser.add_argument('--patience', dest='patience', type=int, default=10, help='number of epochs without improvement to apply early stop')
 #Checkpoint dir
@@ -101,9 +93,7 @@ parser.add_argument('--dataset_main_path', dest='dataset_main_path', type=str, d
 parser.add_argument('--checkpoint_results_main_path', dest='checkpoint_results_main_path', type=str, default='E:/PEDROWORK/Trabajo_Domain_Adaptation/Code/checkpoints_results/')
 parser.add_argument('--save_intermediate_model', dest='save_intermediate_model',type=eval, choices=[True, False], default=True, help='Save intermediate models or not')
 
-
 args = parser.parse_args()
-
 
 # TODO Lucas: P
 def main():
