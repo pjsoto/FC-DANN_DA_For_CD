@@ -12,6 +12,6 @@ source /etc/profile.d/modules.sh
 echo "Load singularity..."
 module load singularity/3.4.1
 echo "Executing singularity..."
-#singularity exec --nv --bind $DATAWORK/:/datawork $HOME/Singularities/tf1.15.5-gpu_rs.sif python $HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Script_Executor_Tr_APA_Ts_APA_P.py --running_in Datarmor_PBS
+singularity exec --nv --bind $DATAWORK/:/datawork $HOME/Singularities/tf1.15.5-gpu_rs.sif python $HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Script_Executor_Tr_APA_Ts_ARO_CMA_DA_M.py --running_in Datarmor_PBS
 #singularity exec --nv --bind $DATAWORK/:/datawork $HOME/Singularities/tf1.15.5-gpu_rs.sif python $HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Script_Executor_Tr_ARO_Ts_ARO_P.py --running_in Datarmor_PBS
-singularity exec --nv --bind $DATAWORK/:/datawork $HOME/Singularities/tf1.15.5-gpu_rs.sif python $HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Script_Executor_Tr_CMA_Ts_CMA_P.py --running_in Datarmor_PBS
+#singularity exec --nv --bind $DATAWORK/:/datawork $HOME/Singularities/tf1.15.5-gpu_rs.sif python $HOME/CODE/CHANGE_DETECTION/FC-DANN_DA_For_CD/Main_Script_Executor_Tr_CMA_Ts_CMA_P.py --running_in Datarmor_PBS

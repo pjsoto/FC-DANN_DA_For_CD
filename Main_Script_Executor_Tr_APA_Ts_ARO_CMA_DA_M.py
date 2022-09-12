@@ -31,11 +31,11 @@ PSEUDLABELS_COEFFICIENTS = ['1.0']
 REFERENCES = ['REFERENCE_2017_EPSG32620_R232_67_CVA_OTSU_PRIOR_0_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-47R-37F1-42']
 PAST_REFERENCES = ['PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67_CVA_OTSU_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-47R-37F1-42']
 
-#Dataset_MAIN_PATH = '/datawork/DATA/CHANGE_DETECTION/'
-#Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
+Dataset_MAIN_PATH = '/datawork/DATA/CHANGE_DETECTION/'
+Checkpoint_Results_MAIN_PATH = '/datawork/EXPERIMENTS/Domain_Adaptation/'
 
-Dataset_MAIN_PATH = 'E:/PEDRO_SOTO/DATA/CHANGE_DETECTION/'
-Checkpoint_Results_MAIN_PATH = 'E:/PEDRO_SOTO/EXPERIMENTS/Domain_Adaptation/'
+#Dataset_MAIN_PATH = 'E:/PEDRO_SOTO/DATA/CHANGE_DETECTION/'
+#Checkpoint_Results_MAIN_PATH = 'E:/PEDRO_SOTO/EXPERIMENTS/Domain_Adaptation/'
 
 for dr_localization in DR_LOCALIZATION:
     for method in METHODS:
