@@ -79,7 +79,7 @@ def Main():
     for i in range(0, len(files)):
         Heat_map_path = args.results_dir + files[i] + '/heat_map.npy'
         args.file = files[i]
-        if os.path.exists(Hit_map_path):
+        if os.path.exists(Heat_map_path):
             heat_map = np.load(Heat_map_path)
             fields_file = files[i].split('_')
             checkpoint_name = fields_file[0] + '_' + fields_file[3] + '_' + fields_file[1] + '_' + fields_file[4] + '_' + fields_file[5] + '_' + fields_file[6] + '_' + fields_file[7] + '_'+ fields_file[8] + '_' + fields_file[9] + '_' + fields_file[10] + '_' + fields_file[11]
