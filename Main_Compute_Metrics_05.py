@@ -77,10 +77,10 @@ def Main():
     counter = 0
     files = os.listdir(args.results_dir)
     for i in range(0, len(files)):
-        Hit_map_path = args.results_dir + files[i] + '/hit_map.npy'
+        Heat_map_path = args.results_dir + files[i] + '/heat_map.npy'
         args.file = files[i]
         if os.path.exists(Hit_map_path):
-            hit_map = np.load(Hit_map_path)
+            heat_map = np.load(Heat_map_path)
             fields_file = files[i].split('_')
             checkpoint_name = fields_file[0] + '_' + fields_file[3] + '_' + fields_file[1] + '_' + fields_file[4] + '_' + fields_file[5] + '_' + fields_file[6] + '_' + fields_file[7] + '_'+ fields_file[8] + '_' + fields_file[9] + '_' + fields_file[10] + '_' + fields_file[11]
             args.save_checkpoint_path = args.checkpoint_dir + '/' + checkpoint_name + '/'
@@ -97,7 +97,7 @@ def Main():
                     PRECISION_ = []
                     ALERT_AREA_ = []
 
-            ACCURACY, FSCORE, RECALL, PRECISION, CONFUSION_MATRIX, ALERT_AREA = Metrics_For_Test(hit_map,
+            ACCURACY, FSCORE, RECALL, PRECISION, CONFUSION_MATRIX, ALERT_AREA = Metrics_For_Test(heat_map,
                                                                                                  dataset.references[0], dataset.references[1],
                                                                                                  dataset.Train_tiles, dataset.Valid_tiles, dataset.Undesired_tiles,
                                                                                                  Thresholds,
