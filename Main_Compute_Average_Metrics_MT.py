@@ -91,7 +91,7 @@ def Main():
             print('Results file')
         else:
             Heat_map_path = args.results_dir + files[i] + '/heat_map.npy'
-            if os.path.exists(heat_map_path):
+            if os.path.exists(Heat_map_path):
                 heat_map = np.load(Heat_map_path)
                 counter += 1
                 if initial_flag:
