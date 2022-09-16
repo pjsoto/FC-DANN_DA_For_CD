@@ -27,7 +27,7 @@ Schedule = []
 DR_LOCALIZATION = ['55']
 METHODS  = ['DeepLab']
 DA_TYPES = ['CL_DR']
-PSEUDLABELS_COEFFICIENTS = ['0.15','0.25','0.50','0.75','0.85','1.0']
+PSEUDLABELS_COEFFICIENTS = ['0.85','1.0']
 REFERENCES = ['REFERENCE_2017_EPSG32620_R232_67_CVA_OTSU_PRIOR_0_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-47R-37F1-42']
 PAST_REFERENCES = ['PAST_REFERENCE_FROM_1988_2017_EPSG32620_R232_67_CVA_OTSU_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-47R-37F1-42']
 
@@ -95,7 +95,7 @@ for dr_localization in DR_LOCALIZATION:
                                     "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                                     "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
-PSEUDLABELS_COEFFICIENTS = ['0.10','0.15','0.25','0.50','0.75','0.85','1.0']
+PSEUDLABELS_COEFFICIENTS = ['0.10','0.25','0.50','0.75','0.85','1.0']
 REFERENCES = ['REFERENCE_2018_EPSG4674_R220_63_CVA_OTSU_PRIOR_0_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-83R-65F1-73']
 PAST_REFERENCES = ['PAST_REFERENCE_FOR_2018_EPSG4674_R220_63_CVA_OTSU_COS_SIM_Mrg_0_Nsy_1_PRef_0_HConf_1_Met_P-83R-65F1-73']
 for dr_localization in DR_LOCALIZATION:
