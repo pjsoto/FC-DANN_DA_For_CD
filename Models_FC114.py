@@ -11,7 +11,6 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.utils import shuffle
 from contextlib import redirect_stdout
-#from tensordash.tensordash import Customdash
 import math
 
 
@@ -161,7 +160,6 @@ class Models():
             else:
                 print(" [!] Load failed...")
                 sys.exit()
-
     def summary(self, net, name):
 
         f = open(self.args.save_checkpoint_path + "Architecture.txt","a")
@@ -171,17 +169,14 @@ class Models():
             f.write(str(net[i].get_shape().as_list()) + "\n")
             #print(net[i].op.name)
         f.close()
-
     def weighted_cross_entropy_c(self, label_c, prediction_c, class_weights):
         temp = -label_c * tf.log(prediction_c + 1e-3)#[Batch_size, patch_dimension, patc_dimension, 2]
         temp_weighted = class_weights * temp
         loss = tf.reduce_sum(temp_weighted, 3)
         return loss # [Batch_size, patch_dimension, patc_dimension, 1]
-
     def Learning_rate_decay(self):
         lr = self.args.lr / (1. + 10 * self.p)**0.75 #modificado de **0.75 para **0.95 - maior decaimento
         return lr
-
     def Train(self):
 
         best_val_fs = 0
@@ -190,7 +185,6 @@ class Models():
         best_mod_dr = 0
         #best_f1score = 0
         pat = 0
-
         #TODO Lucas: Perguntar ao Pedro se esse class_weights está correto
         class_weights = []
         class_weights.append(0.4)
@@ -210,11 +204,8 @@ class Models():
             if 'CL' in self.args.da_type:
                 importance_coefficient_t = self.args.pseudo_labels_coefficient * np.ones((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
 
-
-
         if self.args.balanced_tr:
             class_weights = self.dataset_s.class_weights
-
         # Copy the original input values
         corners_coordinates_tr_s = self.dataset_s.corners_coordinates_tr.copy()
         corners_coordinates_vl_s = self.dataset_s.corners_coordinates_vl.copy()
@@ -236,7 +227,6 @@ class Models():
 
                 reference_t1_t[:,:,0] = reference_t1_.copy()
                 reference_t2_t[:,:,0] = self.dataset_t.references_[1].copy()
-
 
         print('Sets dimensions before data augmentation')
         print('Source dimensions: ')
