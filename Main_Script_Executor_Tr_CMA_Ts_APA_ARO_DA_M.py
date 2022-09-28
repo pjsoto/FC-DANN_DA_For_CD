@@ -143,7 +143,7 @@ for dr_localization in DR_LOCALIZATION:
                     #                "--dataset_main_path "+ Dataset_MAIN_PATH + " "
                     #                "--checkpoint_results_main_path "+ Checkpoint_Results_MAIN_PATH + "")
 
-                    Schedule.append("python " + Metrics_05_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 5 "
+                    Schedule.append("python " + Metrics_th_MAIN_COMMAND + " --classifier_type " + method + " --domain_regressor_type FC --skip_connections False --vertical_blocks 5 "
                                     "--horizontal_blocks 3 --patches_dimension 64 --fixed_tiles True --overlap 0.75 --buffer True "
                                     "--buffer_dimension_out 2 --buffer_dimension_in 0 --eliminate_regions True --area_avoided 69 --Npoints 100 "
                                     "--compute_ndvi False --phase compute_metrics --training_type classification "
