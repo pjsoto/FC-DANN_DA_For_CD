@@ -3,7 +3,7 @@ In the current project, we provide the code used in [] to perform Domain Adaptat
 
 The following figure shows the proposed methodology. The domain adaptation process begins by selecting class-wise balanced training samples from both domains. A traditional down/upsampling strategy can be adopted for the source domain because the class labels are available. However, such a balancing procedure can not be applied straightforwardly for the target domain because the target labels are unknown during training. We used the methodology proposed in [3], which proposes a pseudo-labeling scheme based on Change Vector Analysis (CVA) and a thresholding technique based on the OTSU to produce a pseudo-label map used to select a less imbalanced training set in target domains. In this work, the target samples are also forwarded through the label predictor, where the classification loss is computed using the before-mentioned pseudo label.
 
-
+![Image](image1.png)
 
 # Prerequisites
 1- Python 3.7.4
