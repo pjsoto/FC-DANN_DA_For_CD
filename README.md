@@ -1,4 +1,6 @@
 # FC-DANN_DA_For_CD (Fully Convolutional DANN Domain Adaptation for Change Detection)
+The current project contains the code to perform Domain Adaptation based on Domain-Adversarial Neural Network (DANN) [1] for change detection in remote sensing images adapted to a fully convolutional scheme, specifically for deforestation detection in tropical forests such as the Amazon rainforest and the Brazilian savannah.
+
 # Prerequisites
 1- Python 3.7.4
 
