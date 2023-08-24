@@ -3,7 +3,7 @@ In the current project, we provide the code used in [] to perform Domain Adaptat
 
 The following figure shows the proposed methodology. The domain adaptation process begins by selecting class-wise balanced training samples from both domains. A traditional down/upsampling strategy can be adopted for the source domain because the class labels are available. However, such a balancing procedure can not be applied straightforwardly for the target domain because the target labels are unknown during training. We used the methodology proposed in [3], which proposes a pseudo-labeling scheme based on Change Vector Analysis (CVA) and a thresholding technique based on the OTSU to produce a pseudo-label map used to select a less imbalanced training set in target domains. In this work, the target samples are also forwarded through the label predictor, where the classification loss is computed using the before-mentioned pseudo label.
 
-![Screenshot from 2023-08-24 13-09-35](https://github.com/pjsoto/FC-DANN_DA_For_CD/assets/15098708/eab72d32-54d9-4754-ab41-fef872eaf9ce)
+
 
 # Prerequisites
 1- Python 3.7.4
@@ -16,7 +16,8 @@ Aiming at simplifying Python environment issues, we provide the [docker containe
 # Dataset
 Such implementation has been evaluated in a change detection task, namely deforestation detection, and aiming at reproducing the results obtained in [2] and [3], we make available the images used in this project which can be found in the following links for the [Amazon Biome](https://drive.google.com/drive/folders/1V4UdYors3m3eXaAHXgzPc99esjQOc3mq?usp=sharing) as well as for the [Cerrado](https://drive.google.com/drive/folders/14Jsw0LRcwifwBSPgFm1bZeDBQvewI8NC?usp=sharing). In the same way, the references can be obtained by clicking on [Amazon references](https://drive.google.com/drive/folders/15i04inGjme56t05gk98lXErSRgRnU30x?usp=sharing) and [Cerrado references](https://drive.google.com/drive/folders/1n9QZA_0V0Xh8SrW2rsFMvpjonLNQPJ96?usp=sharing).
 
-![Screenshot from 2023-08-24 13-33-07](https://github.com/pjsoto/FC-DANN_DA_For_CD/assets/15098708/a4f8ac60-c342-4208-a35c-e148783a4a0c)
+
+
 
 
 # References
