@@ -12,3 +12,5 @@ Such implementation has been evaluated in a change detection task namely defores
 [1] Ganin and V. Lempitsky,“Unsupervised   domain   adaptation  by backpropagation,”arXiv preprint arXiv:1409.7495, 2014.
 
 [2] Vega, P. J. S. (2021). DEEP LEARNING-BASED DOMAIN ADAPTATION FOR CHANGE DETECTION IN TROPICAL FORESTS (Doctoral dissertation, PUC-Rio).
+
+[3] Soto, Pedro J., et al. "Domain-adversarial neural networks for deforestation detection in tropical forests." IEEE Geoscience and Remote Sensing Letters 19 (2022): 1-5.
