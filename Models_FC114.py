@@ -115,7 +115,7 @@ class Models():
 
         if self.args.phase == 'train':
             self.dataset_s = self.dataset[0]
-            self.dataset_t = self.dataset[1]
+            
             self.summary(Encoder_Outputs, "Encoder: ")
             self.summary(Decoder_Outputs, "Decoder: ")
             #Defining losses
@@ -141,6 +141,7 @@ class Models():
                     self.total_loss = self.classifier_loss + self.domainregressor_loss
                 else:
                     self.total_loss = self.classifier_loss
+                    self.dataset_t = self.dataset[1]
 
             # Defining the Optimizers
             self.training_optimizer = tf.train.AdamOptimizer(self.learning_rate, self.args.beta1).minimize(self.total_loss) #com learning rate decay
@@ -192,13 +193,14 @@ class Models():
 
         reference_t1_s = np.zeros((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
         reference_t2_s = np.zeros((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
-        reference_t1_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
-        reference_t2_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
+        
 
         #Defining the importance coefficients for the cost function when pseudo-labels are being used in training
         importance_coefficient_s = self.args.pseudo_labels_coefficient * np.ones((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
 
         if self.args.training_type == 'domain_adaptation':
+            reference_t1_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
+            reference_t2_t = np.zeros((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
             importance_coefficient_s = np.ones((self.dataset_s.references_[0].shape[0], self.dataset_s.references_[0].shape[1], 1))
             importance_coefficient_t = np.ones((self.dataset_t.references_[0].shape[0], self.dataset_t.references_[0].shape[1], 1))
             if 'CL' in self.args.da_type:

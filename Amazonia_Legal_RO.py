@@ -16,10 +16,10 @@ class AMAZON_RO():
         self.mask = []
         self.coordinates = []
 
-        Image_t1_path = args.dataset_main_path + args.dataset + args.images_section + args.data_t1_name + '.npy'
-        Image_t2_path = args.dataset_main_path + args.dataset + args.images_section + args.data_t2_name + '.npy'
-        Reference_t1_path = args.dataset_main_path + args.dataset + args.reference_section + args.reference_t1_name + '.npy'
-        Reference_t2_path = args.dataset_main_path + args.dataset + args.reference_section + args.reference_t2_name + '.npy'
+        Image_t1_path = args.dataset_main_path +  "/AMAZON/IMAGES/" + args.data_t1_name + '.npy'
+        Image_t2_path = args.dataset_main_path +  "/AMAZON/IMAGES/" + args.data_t2_name + '.npy'
+        Reference_t1_path = args.dataset_main_path + "/AMAZON/REFERENCES/" + args.reference_t1_name + '.npy'
+        Reference_t2_path = args.dataset_main_path + "/AMAZON/REFERENCES/" + args.reference_t2_name + '.npy'
         print(Image_t1_path)
         # Reading images and references
         print('[*]Reading images...')

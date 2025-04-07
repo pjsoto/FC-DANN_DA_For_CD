@@ -168,7 +168,8 @@ def main():
 
 
     print(np.shape(dataset_s.images_norm))
-    print(np.shape(dataset_t.images_norm))
+    if args.training_type == "domain_adaptation":
+        print(np.shape(dataset_t.images_norm))
     #print(np.shape(dataset_t.images_norm))
     for i in range(args.runs):
         dataset = []
@@ -192,16 +193,17 @@ def main():
         args.porcent_of_positive_pixels_in_actual_reference = args.porcent_of_positive_pixels_in_actual_reference_s
         dataset_s.Tiles_Configuration(args, i)
         dataset_s.Coordinates_Creator(args, i)
-
-        args.vertical_blocks = args.target_vertical_blocks
-        args.horizontal_blocks = args.target_horizontal_blocks
-        args.overlap = args.overlap_t
-        args.porcent_of_positive_pixels_in_actual_reference = args.porcent_of_positive_pixels_in_actual_reference_t
-        dataset_t.Tiles_Configuration(args, i)
-        dataset_t.Coordinates_Creator(args, i)
-
         dataset.append(dataset_s)
-        dataset.append(dataset_t)
+        if args.training_type == "domain_adaptation":
+            args.vertical_blocks = args.target_vertical_blocks
+            args.horizontal_blocks = args.target_horizontal_blocks
+            args.overlap = args.overlap_t
+            args.porcent_of_positive_pixels_in_actual_reference = args.porcent_of_positive_pixels_in_actual_reference_t
+            dataset_t.Tiles_Configuration(args, i)
+            dataset_t.Coordinates_Creator(args, i)
+
+        
+            dataset.append(dataset_t)
 
         print('[*]Initializing the model...')
         model = Models(args, dataset)
